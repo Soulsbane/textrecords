@@ -4,7 +4,7 @@ import std.stdio;
 import std.container : Array;
 import std.string : removechars, lineSplitter;
 import std.regex : Regex, ctRegex, matchFirst;
-import std.algorithm : each;
+import std.algorithm;
 
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
 
@@ -169,6 +169,27 @@ struct TextRecords(T)
 		return recordArray_;
 	}
 
+	RecordArray findAll(S)(const S value, const string recordField)
+	{
+		RecordArray foundRecords;
+
+		foreach(memberName; __traits(allMembers, T))
+		{
+			if(memberName == recordField)
+			{
+				foreach(record; recordArray_)
+				{
+					if(mixin("record." ~ memberName ~ " == value"))
+					{
+						foundRecords.insert(record);
+					}
+				}
+			}
+		}
+
+		return foundRecords;
+	}
+
 	RecordArray recordArray_;
 	alias recordArray_ this;
 }
@@ -180,6 +201,11 @@ unittest
 
 	immutable string data =
 	q{
+		{
+			firstName "Albert"
+			lastName "Einstein"
+		}
+
 		{
 			firstName "Albert"
 			lastName "Einstein"
@@ -208,6 +234,15 @@ unittest
 	collector.dump();
 	writeln;
 
+	writeln("Testing findAll...found these records:");
+	auto foundRecords = collector.findAll!string("Albert", "firstName");
+
+	foreach(foundRecord; foundRecords)
+	{
+		writeln(foundRecord);
+	}
+
+	writeln;
 	writeln("Processing records for VariedData:");
 
 	immutable string variedData =
@@ -227,7 +262,7 @@ unittest
 	}
 
 	TextRecords!VariedData variedCollector;
-	variedCollector.parseFile(fileName);
+	variedCollector.parseFile(fileName); // FIXME: Add temporary file.
 
 	auto variedRecords = variedCollector.getRecords();
 
