@@ -8,6 +8,11 @@ import std.algorithm;
 
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
 
+private template allMembers(T)
+{
+	enum allMembers = __traits(allMembers, T);
+}
+
 /**
 	Manages a record format.
 
@@ -71,7 +76,7 @@ struct TextRecords(T)
 				immutable string key = re["key"].removechars("\"");
 				immutable string value = re["value"].removechars("\"");
 
-				foreach(field; __traits(allMembers, T))
+				foreach(field; allMembers!T)
 				{
 					if(field == key)
 					{
@@ -173,7 +178,7 @@ struct TextRecords(T)
 	{
 		RecordArray foundRecords;
 
-		foreach(memberName; __traits(allMembers, T))
+		foreach(memberName; allMembers!T)
 		{
 			if(memberName == recordField)
 			{
