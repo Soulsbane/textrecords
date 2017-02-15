@@ -1,6 +1,7 @@
 module textrecords.textrecords;
 
 import std.stdio;
+import std.conv : to;
 import std.container : Array;
 import std.string : removechars, lineSplitter;
 import std.regex : Regex, ctRegex, matchFirst;
@@ -80,8 +81,6 @@ struct TextRecords(T)
 				{
 					if(field == key)
 					{
-						import std.conv : to;
-
 						// This generates code in the form of: data.field=to!type(value);
 						immutable string generatedCode = "data." ~ field ~ "=to!" ~ typeof(mixin("data." ~ field)).stringof ~ "(value);";
 						mixin(generatedCode);
@@ -234,6 +233,11 @@ unittest
 	collector.parse(data);
 
 	auto records = collector.getRecords();
+
+	assert(records.front.firstName == "Albert");
+	assert(records.back.firstName == "Albert");
+	assert(records.length == 3);
+	assert(records[0].firstName == "Albert");
 
 	foreach(record; records)
 	{
