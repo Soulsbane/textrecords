@@ -151,6 +151,22 @@ struct TextRecords(T)
 		return recArray;
 	}
 
+	void save(const string name)
+	{
+		foreach(record; recordArray_)
+		{
+			writeln("{");
+
+			foreach(memberName; allMembers!T)
+			{
+				immutable string code = "\t" ~ memberName ~ " " ~ "\"" ~ mixin("to!string(record." ~ memberName ~ ")") ~ "\"";
+				writeln(code);
+			}
+
+			writeln("}\n");
+		}
+	}
+
 	debug
 	{
 		/**
@@ -287,4 +303,7 @@ unittest
 	}
 
 	variedCollector.dump();
+
+	writeln("Saving...");
+	collector.save("test.data");
 }
