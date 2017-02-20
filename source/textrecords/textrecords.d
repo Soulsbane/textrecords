@@ -212,7 +212,15 @@ struct TextRecords(T)
 
 	bool hasValue(S)(const S value, const string recordField)
 	{
-		return canFind!((T data, string text) => data.firstName == text)(recordArray_[], value);
+		foreach(memberName; allMembers!T)
+		{
+			if(memberName == recordField)
+			{
+				return canFind!((T data, string text) => mixin("data." ~ memberName ) == text)(recordArray_[], value);
+			}
+		}
+
+		return false;
 	}
 
 	RecordArray recordArray_;
