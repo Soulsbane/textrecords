@@ -210,6 +210,11 @@ struct TextRecords(T)
 		return foundRecords;
 	}
 
+	bool hasValue(S)(const S value, const string recordField)
+	{
+		return canFind!((T data, string text) => data.firstName == text)(recordArray_[], value);
+	}
+
 	RecordArray recordArray_;
 	alias recordArray_ this;
 }
@@ -306,4 +311,10 @@ unittest
 
 	writeln("Saving...");
 	collector.save("test.data");
+
+	bool found = collector.hasValue!string("Albert", "firstName");
+	bool notFound = collector.hasValue!string("Tom", "firstName");
+	assert(found == true);
+	assert(notFound == false);
+
 }
