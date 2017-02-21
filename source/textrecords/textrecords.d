@@ -221,6 +221,7 @@ struct TextRecords(T)
 		{
 			if(memberName == recordField)
 			{
+<<<<<<< HEAD
 				foreach(record; recordArray_)
 				{
 					auto dataName = mixin("record." ~ memberName);
@@ -233,6 +234,8 @@ struct TextRecords(T)
 						}
 					}
 				}
+=======
+>>>>>>> 0ec124e6596720b7f6179addfd2fc5e41b284d9b
 			}
 		}
 
