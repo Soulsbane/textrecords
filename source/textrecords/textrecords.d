@@ -199,9 +199,14 @@ struct TextRecords(T)
 			{
 				foreach(record; recordArray_)
 				{
-					if(mixin("record." ~ memberName ~ " == value"))
+					auto dataName = mixin("record." ~ memberName);
+
+					static if(is(typeof(dataName) == S))
 					{
-						foundRecords.insert(record);
+						if(dataName == value)
+						{
+							foundRecords.insert(record);
+						}
 					}
 				}
 			}
@@ -216,7 +221,18 @@ struct TextRecords(T)
 		{
 			if(memberName == recordField)
 			{
-				return canFind!((T data, string text) => mixin("data." ~ memberName ) == text)(recordArray_[], value);
+				foreach(record; recordArray_)
+				{
+					auto dataName = mixin("record." ~ memberName);
+
+					static if(is(typeof(dataName) == S))
+					{
+						if(dataName == value)
+						{
+							return true;
+						}
+					}
+				}
 			}
 		}
 
@@ -268,12 +284,6 @@ unittest
 	assert(records.length == 3);
 	assert(records[0].firstName == "Albert");
 
-	foreach(record; records)
-	{
-		//assert(record.firstName == "Albert");
-		//assert(record.lastName== "Einstein");
-	}
-
 	collector.dump();
 	writeln;
 
@@ -285,6 +295,14 @@ unittest
 		writeln(foundRecord);
 	}
 
+	bool found = collector.hasValue!string("Albert", "firstName");
+	bool notFound = collector.hasValue!string("Tom", "firstName");
+	assert(found == true);
+	assert(notFound == false);
+
+	writeln("Saving...");
+	collector.save("test.data");
+
 	writeln;
 	writeln("Processing records for VariedData:");
 
@@ -292,6 +310,16 @@ unittest
 	q{
 		{
 			name "Albert Einstein"
+			id "100"
+		}
+
+		{
+			name "George Washington"
+			id "200"
+		}
+
+		{
+			name "Takahashi Ohmura"
 			id "100"
 		}
 	};
@@ -305,24 +333,17 @@ unittest
 	}
 
 	TextRecords!VariedData variedCollector;
-	variedCollector.parseFile(fileName); // FIXME: Add temporary file.
+
+	variedCollector.parse(variedData);
+	assert(variedCollector.length == 3);
+	//variedCollector.parseFile(variedData); // FIXME: Add temporary file.
+
+	auto variedFoundRecords = variedCollector.findAll!size_t(100, "id");
+	assert(variedFoundRecords.length == 2);
 
 	auto variedRecords = variedCollector.getRecords();
-
-	foreach(variedRecord; variedRecords)
-	{
-		assert(variedRecord.name == "Albert Einstein");
-		assert(variedRecord.id == 100);
-	}
-
 	variedCollector.dump();
 
-	writeln("Saving...");
-	collector.save("test.data");
-
-	bool found = collector.hasValue!string("Albert", "firstName");
-	bool notFound = collector.hasValue!string("Tom", "firstName");
-	assert(found == true);
-	assert(notFound == false);
+	//return canFind!((T data, string text) => mixin("data." ~ memberName) == text)(recordArray_[], value);
 
 }
