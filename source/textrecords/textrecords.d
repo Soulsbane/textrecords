@@ -345,6 +345,9 @@ unittest
 	auto variedRecords = variedCollector.getRecords();
 	variedCollector.dump();
 
-	//return canFind!((T data, string text) => mixin("data." ~ memberName) == text)(recordArray_[], value);
+	immutable bool canFindValue = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
+	assert(canFindValue == true);
 
+	immutable bool canFindValueInvalid = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 999);
+	assert(canFindValueInvalid == false);
 }
