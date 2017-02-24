@@ -284,6 +284,12 @@ unittest
 	assert(records.length == 3);
 	assert(records[0].firstName == "Albert");
 
+	// Since TextRecords supports alias this we can also use collector directly without calling getRecords.
+	assert(collector.front.firstName == "Albert");
+	assert(collector.back.firstName == "Albert");
+	assert(collector.length == 3);
+	assert(collector[0].firstName == "Albert");
+
 	collector.dump();
 	writeln;
 
