@@ -241,23 +241,17 @@ struct TextRecords(T)
 		remove!(S, recordField)(value, 0);
 	}
 
-	bool hasValue(S)(const S value, const string recordField)
+	bool hasValue(S, alias recordField)(const S value)
 	{
-		foreach(memberName; allMembers!T)
+		static if(is(typeof(mixin("T." ~ recordField)) == S))
 		{
-			if(memberName == recordField)
+			foreach(record; recordArray_)
 			{
-				foreach(record; recordArray_)
-				{
-					auto dataName = mixin("record." ~ memberName);
+				auto dataName = mixin("record." ~ recordField);
 
-					static if(is(typeof(dataName) == S))
-					{
-						if(dataName == value)
-						{
-							return true;
-						}
-					}
+				if(dataName == value)
+				{
+					return true;
 				}
 			}
 		}
@@ -327,8 +321,8 @@ unittest
 		writeln(foundRecord);
 	}
 
-	bool found = collector.hasValue!string("Albert", "firstName");
-	bool notFound = collector.hasValue!string("Tom", "firstName");
+	bool found = collector.hasValue!(string, "firstName")("Albert");
+	bool notFound = collector.hasValue!(string, "firstName")("Tom");
 	assert(found == true);
 	assert(notFound == false);
 
