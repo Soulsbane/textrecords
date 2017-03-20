@@ -199,24 +199,21 @@ struct TextRecords(T)
 		return recordArray_;
 	}
 
-	RecordArray findAll(S)(const S value, const string recordField)
+	RecordArray findAll(S, alias recordField)(const S value)
 	{
 		RecordArray foundRecords;
 
-		foreach(memberName; allMembers!T)
+		static if(is(typeof(mixin("T." ~ recordField)) == S))
 		{
-			if(memberName == recordField)
+			foreach(record; recordArray_)
 			{
-				foreach(record; recordArray_)
-				{
-					auto dataName = mixin("record." ~ memberName);
+				auto dataName = mixin("record." ~ recordField);
 
-					static if(is(typeof(dataName) == S))
+				static if(is(typeof(dataName) == S))
+				{
+					if(dataName == value)
 					{
-						if(dataName == value)
-						{
-							foundRecords.insert(record);
-						}
+						foundRecords.insert(record);
 					}
 				}
 			}
@@ -326,7 +323,7 @@ unittest
 	writeln;
 
 	writeln("Testing findAll...found these records:");
-	auto foundRecords = collector.findAll!string("Albert", "firstName");
+	auto foundRecords = collector.findAll!(string, "firstName")("Albert");
 
 	foreach(foundRecord; foundRecords)
 	{
@@ -381,7 +378,7 @@ unittest
 	assert(variedCollector.length == 4);
 	//variedCollector.parseFile(variedData); // FIXME: Add temporary file.
 
-	auto variedFoundRecords = variedCollector.findAll!size_t(100, "id");
+	auto variedFoundRecords = variedCollector.findAll!(size_t, "id")(100);
 	assert(variedFoundRecords.length == 3);
 
 	auto variedRecords = variedCollector.getRecords();
