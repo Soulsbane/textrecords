@@ -225,30 +225,6 @@ struct TextRecords(T)
 		return foundRecords;
 	}
 
-	/*void remove(S)(const S value, const string recordField, size_t removeCount = 1)
-	{
-		foreach(memberName; allMembers!T)
-		{
-			if(memberName == recordField)
-			{
-				static if(is(typeof(mixin("T." ~ memberName)) == S))
-				{
-					auto range = recordArray_[];
-					auto found = find!((T data, S fieldValue) => mixin("data." ~ memberName) == fieldValue)(recordArray_[], value);
-
-					if(removeCount != 0)
-					{
-						recordArray_.linearRemove(found.take(removeCount));
-					}
-					else
-					{
-						recordArray_.linearRemove(found.take(found.length));
-					}
-				}
-			}
-		}
-	}*/
-
 	void remove(S, alias recordField)(const S value, size_t removeCount = 1)
 	{
 		static if(is(typeof(mixin("T." ~ recordField)) == S))
