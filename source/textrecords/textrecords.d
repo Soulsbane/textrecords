@@ -6,6 +6,7 @@ import std.container : Array;
 import std.string : removechars, lineSplitter;
 import std.regex : Regex, ctRegex, matchFirst;
 import std.algorithm;
+import std.range;
 
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
 
@@ -215,6 +216,35 @@ struct TextRecords(T)
 		return foundRecords;
 	}
 
+	void remove(S)(const S value, const string recordField, size_t removeCount = 1)
+	{
+		foreach(memberName; allMembers!T)
+		{
+			if(memberName == recordField)
+			{
+				static if(is(typeof(mixin("T." ~ memberName)) == S))
+				{
+					auto range = recordArray_[];
+					auto found = find!((T data, S fieldValue) => mixin("data." ~ memberName) == fieldValue)(recordArray_[], value);
+
+					if(removeCount != 0)
+					{
+						recordArray_.linearRemove(found.take(removeCount));
+					}
+					else
+					{
+						recordArray_.linearRemove(found.take(found.length));
+					}
+				}
+			}
+		}
+	}
+
+	void removeAll(S)(const S value, const string recordField)
+	{
+		remove!S(value, recordField, 0);
+	}
+
 	bool hasValue(S)(const S value, const string recordField)
 	{
 		foreach(memberName; allMembers!T)
@@ -329,6 +359,11 @@ unittest
 			name "Takahashi Ohmura"
 			id "100"
 		}
+
+		{
+			name "Nakamoto Suzuka"
+			id "100"
+		}
 	};
 
 	enum fileName = "test-record.dat";
@@ -342,17 +377,31 @@ unittest
 	TextRecords!VariedData variedCollector;
 
 	variedCollector.parse(variedData);
-	assert(variedCollector.length == 3);
+	assert(variedCollector.length == 4);
 	//variedCollector.parseFile(variedData); // FIXME: Add temporary file.
 
 	auto variedFoundRecords = variedCollector.findAll!size_t(100, "id");
-	assert(variedFoundRecords.length == 2);
+	assert(variedFoundRecords.length == 3);
 
 	auto variedRecords = variedCollector.getRecords();
 	variedCollector.dump();
 
 	immutable bool canFindValue = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
 	assert(canFindValue == true);
+
+	/*auto foundAtIndex = countUntil!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
+	auto remainder = remove(variedCollector[], foundAtIndex);
+	assert(remainder.length == 2);*/
+
+	//auto found2 = find!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
+	//variedCollector.linearRemove(found2.take(1));
+	//variedCollector.linearRemove(found2.take(found2.length)); // Removes all records
+
+	variedCollector.remove!size_t(100, "id");
+	assert(variedCollector.length == 3);
+
+	variedCollector.removeAll!size_t(100, "id");
+	assert(variedCollector.length == 1);
 
 	immutable bool canFindValueInvalid = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 999);
 	assert(canFindValueInvalid == false);
