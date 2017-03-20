@@ -1,3 +1,6 @@
+/**
+	A simple record format processor.
+*/
 module textrecords.textrecords;
 
 import std.stdio;
@@ -152,7 +155,13 @@ struct TextRecords(T)
 		return recArray;
 	}
 
-	void save(const string name)
+	/**
+		Saves records to a file.
+
+		Params:
+			name = Name of the file to save records to.
+	*/
+	void save(const string name) //TODO: actually save to file; only outputs to stdout at the moment.
 	{
 		foreach(record; recordArray_)
 		{
@@ -216,7 +225,7 @@ struct TextRecords(T)
 		return foundRecords;
 	}
 
-	void remove(S)(const S value, const string recordField, size_t removeCount = 1)
+	/*void remove(S)(const S value, const string recordField, size_t removeCount = 1)
 	{
 		foreach(memberName; allMembers!T)
 		{
@@ -238,11 +247,28 @@ struct TextRecords(T)
 				}
 			}
 		}
+	}*/
+
+	void remove(S, alias recordField)(const S value, size_t removeCount = 1)
+	{
+		static if(is(typeof(mixin("T." ~ recordField)) == S))
+		{
+			auto found = find!((T data, S fieldValue) => mixin("data." ~ recordField) == fieldValue)(recordArray_[], value);
+
+			if(removeCount != 0)
+			{
+				recordArray_.linearRemove(found.take(removeCount));
+			}
+			else
+			{
+				recordArray_.linearRemove(found.take(found.length));
+			}
+		}
 	}
 
-	void removeAll(S)(const S value, const string recordField)
+	void removeAll(S, alias recordField)(const S value)
 	{
-		remove!S(value, recordField, 0);
+		remove!(S, recordField)(value, 0);
 	}
 
 	bool hasValue(S)(const S value, const string recordField)
@@ -396,10 +422,11 @@ unittest
 	//variedCollector.linearRemove(found2.take(1));
 	//variedCollector.linearRemove(found2.take(found2.length)); // Removes all records
 
-	variedCollector.remove!size_t(100, "id");
+	//variedCollector.remove!size_t(100, "id");
+	variedCollector.remove!(size_t, "id")(100);
 	assert(variedCollector.length == 3);
 
-	variedCollector.removeAll!size_t(100, "id");
+	variedCollector.removeAll!(size_t, "id")(100);
 	assert(variedCollector.length == 1);
 
 	immutable bool canFindValueInvalid = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 999);
