@@ -209,12 +209,9 @@ struct TextRecords(T)
 			{
 				auto dataName = mixin("record." ~ recordField);
 
-				static if(is(typeof(dataName) == S))
+				if(dataName == value)
 				{
-					if(dataName == value)
-					{
-						foundRecords.insert(record);
-					}
+					foundRecords.insert(record);
 				}
 			}
 		}
