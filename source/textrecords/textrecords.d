@@ -1,3 +1,6 @@
+/**
+	A simple record format processor.
+*/
 module textrecords.textrecords;
 
 import std.stdio;
@@ -152,7 +155,13 @@ struct TextRecords(T)
 		return recArray;
 	}
 
-	void save(const string name)
+	/**
+		Saves records to a file.
+
+		Params:
+			name = Name of the file to save records to.
+	*/
+	void save(const string name) //TODO: actually save to file; only outputs to stdout at the moment.
 	{
 		foreach(record; recordArray_)
 		{
@@ -190,25 +199,19 @@ struct TextRecords(T)
 		return recordArray_;
 	}
 
-	RecordArray findAll(S)(const S value, const string recordField)
+	RecordArray findAll(S, alias recordField)(const S value)
 	{
 		RecordArray foundRecords;
 
-		foreach(memberName; allMembers!T)
+		static if(is(typeof(mixin("T." ~ recordField)) == S))
 		{
-			if(memberName == recordField)
+			foreach(record; recordArray_)
 			{
-				foreach(record; recordArray_)
-				{
-					auto dataName = mixin("record." ~ memberName);
+				auto dataName = mixin("record." ~ recordField);
 
-					static if(is(typeof(dataName) == S))
-					{
-						if(dataName == value)
-						{
-							foundRecords.insert(record);
-						}
-					}
+				if(dataName == value)
+				{
+					foundRecords.insert(record);
 				}
 			}
 		}
@@ -216,53 +219,39 @@ struct TextRecords(T)
 		return foundRecords;
 	}
 
-	void remove(S)(const S value, const string recordField, size_t removeCount = 1)
+	void remove(S, alias recordField)(const S value, size_t removeCount = 1)
 	{
-		foreach(memberName; allMembers!T)
+		static if(is(typeof(mixin("T." ~ recordField)) == S))
 		{
-			if(memberName == recordField)
-			{
-				static if(is(typeof(mixin("T." ~ memberName)) == S))
-				{
-					auto range = recordArray_[];
-					auto found = find!((T data, S fieldValue) => mixin("data." ~ memberName) == fieldValue)(recordArray_[], value);
+			auto found = find!((T data, S fieldValue) => mixin("data." ~ recordField) == fieldValue)(recordArray_[], value);
 
-					if(removeCount != 0)
-					{
-						recordArray_.linearRemove(found.take(removeCount));
-					}
-					else
-					{
-						recordArray_.linearRemove(found.take(found.length));
-					}
-				}
+			if(removeCount != 0)
+			{
+				recordArray_.linearRemove(found.take(removeCount));
+			}
+			else
+			{
+				recordArray_.linearRemove(found.take(found.length));
 			}
 		}
 	}
 
-	void removeAll(S)(const S value, const string recordField)
+	void removeAll(S, alias recordField)(const S value)
 	{
-		remove!S(value, recordField, 0);
+		remove!(S, recordField)(value, 0);
 	}
 
-	bool hasValue(S)(const S value, const string recordField)
+	bool hasValue(S, alias recordField)(const S value)
 	{
-		foreach(memberName; allMembers!T)
+		static if(is(typeof(mixin("T." ~ recordField)) == S))
 		{
-			if(memberName == recordField)
+			foreach(record; recordArray_)
 			{
+				auto dataName = mixin("record." ~ recordField);
 
-				foreach(record; recordArray_)
+				if(dataName == value)
 				{
-					auto dataName = mixin("record." ~ memberName);
-
-					static if(is(typeof(dataName) == S))
-					{
-						if(dataName == value)
-						{
-							return true;
-						}
-					}
+					return true;
 				}
 			}
 		}
@@ -325,15 +314,15 @@ unittest
 	writeln;
 
 	writeln("Testing findAll...found these records:");
-	auto foundRecords = collector.findAll!string("Albert", "firstName");
+	auto foundRecords = collector.findAll!(string, "firstName")("Albert");
 
 	foreach(foundRecord; foundRecords)
 	{
 		writeln(foundRecord);
 	}
 
-	bool found = collector.hasValue!string("Albert", "firstName");
-	bool notFound = collector.hasValue!string("Tom", "firstName");
+	bool found = collector.hasValue!(string, "firstName")("Albert");
+	bool notFound = collector.hasValue!(string, "firstName")("Tom");
 	assert(found == true);
 	assert(notFound == false);
 
@@ -380,7 +369,7 @@ unittest
 	assert(variedCollector.length == 4);
 	//variedCollector.parseFile(variedData); // FIXME: Add temporary file.
 
-	auto variedFoundRecords = variedCollector.findAll!size_t(100, "id");
+	auto variedFoundRecords = variedCollector.findAll!(size_t, "id")(100);
 	assert(variedFoundRecords.length == 3);
 
 	auto variedRecords = variedCollector.getRecords();
@@ -397,10 +386,11 @@ unittest
 	//variedCollector.linearRemove(found2.take(1));
 	//variedCollector.linearRemove(found2.take(found2.length)); // Removes all records
 
-	variedCollector.remove!size_t(100, "id");
+	//variedCollector.remove!size_t(100, "id");
+	variedCollector.remove!(size_t, "id")(100);
 	assert(variedCollector.length == 3);
 
-	variedCollector.removeAll!size_t(100, "id");
+	variedCollector.removeAll!(size_t, "id")(100);
 	assert(variedCollector.length == 1);
 
 	immutable bool canFindValueInvalid = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 999);
