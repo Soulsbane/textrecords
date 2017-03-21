@@ -264,8 +264,64 @@ struct TextRecords(T)
 		recordArray_.insert(value);
 	}
 
+	mixin(generateInsertMethod!T);
+
 	RecordArray recordArray_;
 	alias recordArray_ this;
+}
+
+private string generateInsertMethod(T)()
+{
+	/*
+	Generates an insert method where the parameters are each field of T
+	For Example:
+
+	struct NameData
+	{
+		string firstName;
+		string lastName;
+	}
+
+	Will generate this function:
+
+	void insert(string firstName, string lastName)
+	{
+		NameData data;
+
+		data.firstName = firstName;
+		data.lastName = lastName;
+
+		insert(data);
+	}
+	*/
+	string code;
+
+	code = "void insert(";
+
+	foreach (index, memberType; typeof(T.tupleof))
+	{
+		code ~= memberType.stringof ~ " " ~ T.tupleof[index].stringof ~ ", ";
+	}
+
+	if(code.back == ',')
+	{
+		code.popBack;
+	}
+
+	code ~= "){";
+	code ~= "T data;";
+
+
+	foreach (index, memberType; typeof(T.tupleof))
+	{
+		string memberName = T.tupleof[index].stringof;
+		code ~= "data." ~  memberName ~ " = " ~ memberName ~ ";";
+	}
+
+	code ~= "insert(data);";
+	code ~= "}";
+
+	return code;
 }
 
 ///
@@ -404,4 +460,7 @@ unittest
 	VariedData insertData;
 	variedCollector.insert(insertData);
 	assert(variedCollector.length == 2);
+
+	variedCollector.insert("Utada Hikaru", 111);
+	assert(variedCollector.length == 3);
 }
