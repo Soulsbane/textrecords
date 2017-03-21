@@ -259,6 +259,11 @@ struct TextRecords(T)
 		return false;
 	}
 
+	void insert(T value)
+	{
+		recordArray_.insert(value);
+	}
+
 	RecordArray recordArray_;
 	alias recordArray_ this;
 }
@@ -395,4 +400,8 @@ unittest
 
 	immutable bool canFindValueInvalid = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 999);
 	assert(canFindValueInvalid == false);
+
+	VariedData insertData;
+	variedCollector.insert(insertData);
+	assert(variedCollector.length == 2);
 }
