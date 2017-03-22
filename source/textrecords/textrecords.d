@@ -12,6 +12,7 @@ import std.algorithm;
 import std.range;
 
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
+alias StdFind = std.algorithm.searching.find;
 
 private template allMembers(T)
 {
@@ -199,6 +200,16 @@ struct TextRecords(T)
 		return recordArray_;
 	}
 
+	auto find(S, alias recordField)(const S value, size_t amount = 1)
+	{
+		static if(is(typeof(mixin("T." ~ recordField)) == S))
+		{
+			auto found = StdFind!((T data, S fieldValue) => mixin("data." ~ recordField) == fieldValue)(recordArray_[], value);
+		}
+
+		return found.take(amount);
+	}
+
 	RecordArray findAll(S, alias recordField)(const S value)
 	{
 		RecordArray foundRecords;
@@ -223,7 +234,7 @@ struct TextRecords(T)
 	{
 		static if(is(typeof(mixin("T." ~ recordField)) == S))
 		{
-			auto found = find!((T data, S fieldValue) => mixin("data." ~ recordField) == fieldValue)(recordArray_[], value);
+			auto found = StdFind!((T data, S fieldValue) => mixin("data." ~ recordField) == fieldValue)(recordArray_[], value);
 
 			if(removeCount != 0)
 			{
@@ -463,4 +474,7 @@ unittest
 
 	variedCollector.insert("Utada Hikaru", 111);
 	assert(variedCollector.length == 3);
+
+	auto record = variedCollector.find!(size_t, "id")(111);
+	assert(record[0].name == "Utada Hikaru");
 }
