@@ -219,18 +219,15 @@ struct TextRecords(T)
 
 	void remove(S, alias recordField)(const S value, size_t removeCount = 1)
 	{
-		static if(is(typeof(mixin("T." ~ recordField)) == S))
-		{
-			auto found = StdFind!((T data, S fieldValue) => mixin("data." ~ recordField) == fieldValue)(recordArray_[], value);
+		auto found = StdFind!((T data, S fieldValue) => mixin("data." ~ recordField) == fieldValue)(recordArray_[], value);
 
-			if(removeCount != 0)
-			{
-				recordArray_.linearRemove(found.take(removeCount));
-			}
-			else
-			{
-				recordArray_.linearRemove(found.take(found.length));
-			}
+		if(removeCount != 0)
+		{
+			recordArray_.linearRemove(found.take(removeCount));
+		}
+		else
+		{
+			recordArray_.linearRemove(found.take(found.length));
 		}
 	}
 
@@ -241,16 +238,13 @@ struct TextRecords(T)
 
 	bool hasValue(S, alias recordField)(const S value)
 	{
-		static if(is(typeof(mixin("T." ~ recordField)) == S))
+		foreach(record; recordArray_)
 		{
-			foreach(record; recordArray_)
-			{
-				auto dataName = mixin("record." ~ recordField);
+			auto dataName = mixin("record." ~ recordField);
 
-				if(dataName == value)
-				{
-					return true;
-				}
+			if(dataName == value)
+			{
+				return true;
 			}
 		}
 
