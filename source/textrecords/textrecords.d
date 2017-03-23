@@ -10,6 +10,7 @@ import std.string : removechars, lineSplitter;
 import std.regex : Regex, ctRegex, matchFirst;
 import std.algorithm;
 import std.range;
+import std.array;
 
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
 alias StdFind = std.algorithm.searching.find;
@@ -164,18 +165,24 @@ struct TextRecords(T)
 	*/
 	void save(const string name) //TODO: actually save to file; only outputs to stdout at the moment.
 	{
+
+		auto app = appender!string();
+		auto f = File(name, "w");
+
 		foreach(record; recordArray_)
 		{
-			writeln("{");
+			app.put("{\n");
 
 			foreach(memberName; allMembers!T)
 			{
-				immutable string code = "\t" ~ memberName ~ " " ~ "\"" ~ mixin("to!string(record." ~ memberName ~ ")") ~ "\"";
-				writeln(code);
+				immutable string code = "\t" ~ memberName ~ " " ~ "\"" ~ mixin("to!string(record." ~ memberName ~ ")") ~ "\"\n";
+				app.put(code);
 			}
 
-			writeln("}\n");
+			app.put("}\n\n");
 		}
+
+		f.write(app.data);
 	}
 
 	debug
@@ -238,17 +245,7 @@ struct TextRecords(T)
 
 	bool hasValue(S, alias recordField)(const S value)
 	{
-		foreach(record; recordArray_)
-		{
-			auto dataName = mixin("record." ~ recordField);
-
-			if(dataName == value)
-			{
-				return true;
-			}
-		}
-
-		return false;
+		return canFind!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]);
 	}
 
 	void insert(T value)
@@ -449,4 +446,6 @@ unittest
 
 	auto record = variedCollector.find!(size_t, "id")(111);
 	assert(record[0].name == "Utada Hikaru");
+
+	variedCollector.save("varied.db");
 }
