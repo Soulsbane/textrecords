@@ -238,17 +238,7 @@ struct TextRecords(T)
 
 	bool hasValue(S, alias recordField)(const S value)
 	{
-		foreach(record; recordArray_)
-		{
-			auto dataName = mixin("record." ~ recordField);
-
-			if(dataName == value)
-			{
-				return true;
-			}
-		}
-
-		return false;
+		return canFind!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]);
 	}
 
 	void insert(T value)
