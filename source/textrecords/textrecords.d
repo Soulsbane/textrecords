@@ -202,32 +202,19 @@ struct TextRecords(T)
 
 	auto find(S, alias recordField)(const S value, size_t amount = 1)
 	{
-		static if(is(typeof(mixin("T." ~ recordField)) == S))
+		auto found = filter!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]).array;
+
+		if(amount != 0)
 		{
-			auto found = StdFind!((T data, S fieldValue) => mixin("data." ~ recordField) == fieldValue)(recordArray_[], value);
+			return found.take(amount);
 		}
 
-		return found.take(amount);
+		return found;
 	}
 
-	RecordArray findAll(S, alias recordField)(const S value)
+	auto findAll(S, alias recordField)(const S value)
 	{
-		RecordArray foundRecords;
-
-		static if(is(typeof(mixin("T." ~ recordField)) == S))
-		{
-			foreach(record; recordArray_)
-			{
-				auto dataName = mixin("record." ~ recordField);
-
-				if(dataName == value)
-				{
-					foundRecords.insert(record);
-				}
-			}
-		}
-
-		return foundRecords;
+		return find!(S, recordField)(value, 0);
 	}
 
 	void remove(S, alias recordField)(const S value, size_t removeCount = 1)
@@ -450,15 +437,6 @@ unittest
 	immutable bool canFindValue = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
 	assert(canFindValue == true);
 
-	/*auto foundAtIndex = countUntil!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
-	auto remainder = remove(variedCollector[], foundAtIndex);
-	assert(remainder.length == 2);*/
-
-	//auto found2 = find!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
-	//variedCollector.linearRemove(found2.take(1));
-	//variedCollector.linearRemove(found2.take(found2.length)); // Removes all records
-
-	//variedCollector.remove!size_t(100, "id");
 	variedCollector.remove!(size_t, "id")(100);
 	assert(variedCollector.length == 3);
 
