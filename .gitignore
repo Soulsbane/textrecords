@@ -5,3 +5,6 @@ __dummy.html
 *.obj
 *.a
 __test__library__
+textrecords-test-library
+test.data
+varied.db
