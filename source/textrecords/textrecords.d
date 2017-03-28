@@ -354,7 +354,7 @@ private string generateFindMethodNameCode(T)()
 }
 
 /*
-	This generates an find method based on a structs member names. For example this struct:
+	This generates an findAll method based on a structs member names. For example this struct:
 
 	struct Test
 	{
