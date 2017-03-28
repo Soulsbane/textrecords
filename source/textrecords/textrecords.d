@@ -257,6 +257,7 @@ struct TextRecords(T)
 
 	mixin(generateInsertMethod!T);
 	mixin(generateFindMethodNameCode!T);
+	mixin(generateFindAllMethodNameCode!T);
 
 	RecordArray recordArray_;
 	alias recordArray_ this;
@@ -345,6 +346,42 @@ private string generateFindMethodNameCode(T)()
 			auto find%s(const %s value)
 			{
 				return find!(%s, "%s")(value);
+			}
+		}, T.tupleof[i].stringof.capitalize, memType, memType, T.tupleof[i].stringof);
+	}
+
+	return code;
+}
+
+/*
+	This generates an find method based on a structs member names. For example this struct:
+
+	struct Test
+	{
+		string name;
+	}
+
+	will generate this code:
+
+	void findNameAll(const string value)
+	{
+		return find!(string, "name")(value);
+	}
+
+	it does this for each member of the struct.
+*/
+private string generateFindAllMethodNameCode(T)()
+{
+	string code;
+
+	foreach (i, memberType; typeof(T.tupleof))
+	{
+		immutable string memType = memberType.stringof;
+
+		code ~= format(q{
+			auto find%sAll(const %s value)
+			{
+				return find!(%s, "%s")(value, 0);
 			}
 		}, T.tupleof[i].stringof.capitalize, memType, memType, T.tupleof[i].stringof);
 	}
@@ -466,6 +503,8 @@ unittest
 
 	immutable bool canFindValue = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
 	assert(canFindValue == true);
+
+	assert(variedCollector.findIdAll(100).length == 3);
 
 	variedCollector.remove!(size_t, "id")(100);
 	assert(variedCollector.length == 3);
