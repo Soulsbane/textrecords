@@ -11,6 +11,8 @@ import std.regex : Regex, ctRegex, matchFirst;
 import std.algorithm;
 import std.range;
 import std.array;
+import std.format;
+import std.string;
 
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
 alias StdFind = std.algorithm.searching.find;
@@ -254,6 +256,7 @@ struct TextRecords(T)
 	}
 
 	mixin(generateInsertMethod!T);
+	mixin(generateFindMethodNameCode!T);
 
 	RecordArray recordArray_;
 	alias recordArray_ this;
@@ -309,6 +312,42 @@ private string generateInsertMethod(T)()
 
 	code ~= "insert(data);";
 	code ~= "}";
+
+	return code;
+}
+
+/*
+	This generates an find method based on a structs member names. For example this struct:
+
+	struct Test
+	{
+		string name;
+	}
+
+	will generate this code:
+
+	void findName(const string value)
+	{
+		return find!(string, "name")(value);
+	}
+
+	it does this for each member of the struct.
+*/
+private string generateFindMethodNameCode(T)()
+{
+	string code;
+
+	foreach (i, memberType; typeof(T.tupleof))
+	{
+		immutable string memType = memberType.stringof;
+
+		code ~= format(q{
+			auto find%s(const %s value)
+			{
+				return find!(%s, "%s")(value);
+			}
+		}, T.tupleof[i].stringof.capitalize, memType, memType, T.tupleof[i].stringof);
+	}
 
 	return code;
 }
@@ -446,6 +485,9 @@ unittest
 
 	auto record = variedCollector.find!(size_t, "id")(111);
 	assert(record[0].name == "Utada Hikaru");
+
+	auto usingNamedMethod = variedCollector.findId(111);
+	assert(usingNamedMethod[0].name == "Utada Hikaru");
 
 	variedCollector.save("varied.db");
 }
