@@ -165,7 +165,7 @@ struct TextRecords(T)
 		Params:
 			name = Name of the file to save records to.
 	*/
-	void save(const string name) //TODO: actually save to file; only outputs to stdout at the moment.
+	void save(const string name)
 	{
 
 		auto app = appender!string();
