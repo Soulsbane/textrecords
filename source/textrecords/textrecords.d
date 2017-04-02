@@ -383,7 +383,7 @@ private string generateFindAllMethodNameCode(T)()
 		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
-			auto findBy%sAll(const %s value)
+			auto findAllBy%s(const %s value)
 			{
 				return find!(%s, "%s")(value, 0);
 			}
@@ -508,7 +508,7 @@ unittest
 	immutable bool canFindValue = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
 	assert(canFindValue == true);
 
-	assert(variedCollector.findByIdAll(100).length == 3);
+	assert(variedCollector.findAllById(100).length == 3);
 
 	variedCollector.remove!(size_t, "id")(100);
 	assert(variedCollector.length == 3);
@@ -564,9 +564,9 @@ unittest
 	TextRecords!IrregularNames irrCollector;
 	irrCollector.parse(irrData);
 
-	auto idRecords = irrCollector.findByIdAll(100);
+	auto idRecords = irrCollector.findAllById(100);
 	assert(idRecords[1].realName == "Utada Hikaru");
 
-	auto nickNameRecords = irrCollector.findByNickNameAll("hikki");
+	auto nickNameRecords = irrCollector.findAllByNickName("hikki");
 	assert(nickNameRecords[0].realName == "Utada Hikaru");
 }
