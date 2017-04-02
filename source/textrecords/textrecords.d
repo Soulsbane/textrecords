@@ -165,7 +165,7 @@ struct TextRecords(T)
 		Params:
 			name = Name of the file to save records to.
 	*/
-	void save(const string name) //TODO: actually save to file; only outputs to stdout at the moment.
+	void save(const string name)
 	{
 
 		auto app = appender!string();
@@ -327,7 +327,7 @@ private string generateInsertMethod(T)()
 
 	will generate this code:
 
-	void findName(const string value)
+	void findByName(const string value)
 	{
 		return find!(string, "name")(value);
 	}
@@ -343,7 +343,7 @@ private string generateFindMethodNameCode(T)()
 		immutable string memType = memberType.stringof;
 
 		code ~= format(q{
-			auto find%s(const %s value)
+			auto findBy%s(const %s value)
 			{
 				return find!(%s, "%s")(value);
 			}
@@ -363,7 +363,7 @@ private string generateFindMethodNameCode(T)()
 
 	will generate this code:
 
-	void findNameAll(const string value)
+	void findByNameAll(const string value)
 	{
 		return find!(string, "name")(value);
 	}
@@ -379,7 +379,7 @@ private string generateFindAllMethodNameCode(T)()
 		immutable string memType = memberType.stringof;
 
 		code ~= format(q{
-			auto find%sAll(const %s value)
+			auto findBy%sAll(const %s value)
 			{
 				return find!(%s, "%s")(value, 0);
 			}
@@ -504,7 +504,7 @@ unittest
 	immutable bool canFindValue = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
 	assert(canFindValue == true);
 
-	assert(variedCollector.findIdAll(100).length == 3);
+	assert(variedCollector.findByIdAll(100).length == 3);
 
 	variedCollector.remove!(size_t, "id")(100);
 	assert(variedCollector.length == 3);
@@ -525,7 +525,7 @@ unittest
 	auto record = variedCollector.find!(size_t, "id")(111);
 	assert(record[0].name == "Utada Hikaru");
 
-	auto usingNamedMethod = variedCollector.findId(111);
+	auto usingNamedMethod = variedCollector.findById(111);
 	assert(usingNamedMethod[0].name == "Utada Hikaru");
 
 	variedCollector.save("varied.db");
