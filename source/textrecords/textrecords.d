@@ -341,13 +341,15 @@ private string generateFindMethodNameCode(T)()
 	foreach (i, memberType; typeof(T.tupleof))
 	{
 		immutable string memType = memberType.stringof;
+		immutable string memName = T.tupleof[i].stringof;
+		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
 			auto findBy%s(const %s value)
 			{
 				return find!(%s, "%s")(value);
 			}
-		}, T.tupleof[i].stringof.capitalize, memType, memType, T.tupleof[i].stringof);
+		}, memNameCapitalized, memType, memType, memName);
 	}
 
 	return code;
@@ -377,13 +379,15 @@ private string generateFindAllMethodNameCode(T)()
 	foreach (i, memberType; typeof(T.tupleof))
 	{
 		immutable string memType = memberType.stringof;
+		immutable string memName = T.tupleof[i].stringof;
+		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
 			auto findBy%sAll(const %s value)
 			{
 				return find!(%s, "%s")(value, 0);
 			}
-		}, T.tupleof[i].stringof.capitalize, memType, memType, T.tupleof[i].stringof);
+		}, memNameCapitalized, memType, memType, memName);
 	}
 
 	return code;
@@ -529,4 +533,40 @@ unittest
 	assert(usingNamedMethod[0].name == "Utada Hikaru");
 
 	variedCollector.save("varied.db");
+
+	immutable string irrData =
+	q{
+		{
+			nickName "Lisa"
+			realName "Melissa"
+			id "100"
+		}
+
+		{
+			nickName "Liz"
+			realName "Elizabeth Rogers"
+			id "122"
+		}
+		{
+			nickName "hikki"
+			realName "Utada Hikaru"
+			id "100"
+		}
+	};
+
+	struct IrregularNames
+	{
+		string realName;
+		string nickName;
+		size_t id;
+	}
+
+	TextRecords!IrregularNames irrCollector;
+	irrCollector.parse(irrData);
+
+	auto idRecords = irrCollector.findByIdAll(100);
+	assert(idRecords[1].realName == "Utada Hikaru");
+
+	auto nickNameRecords = irrCollector.findByNickNameAll("hikki");
+	assert(nickNameRecords[0].realName == "Utada Hikaru");
 }
