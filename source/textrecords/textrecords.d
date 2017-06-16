@@ -204,10 +204,12 @@ struct TextRecords(T)
 		Returns:
 			An array of records.
 	*/
-	auto getRecords()
+	auto getRecordsRaw()
 	{
 		return recordArray_;
 	}
+
+	alias getRecords = getRecordsRaw; // FIXME: Remove once deprecated phase is over.
 
 	/**
 		Returns an array of records.
@@ -484,14 +486,14 @@ unittest
 	TextRecords!NameData collector;
 	collector.parse(data);
 
-	auto records = collector.getRecords();
+	auto records = collector.getRecordsRaw();
 
 	assert(records.front.firstName == "Albert");
 	assert(records.back.firstName == "Albert");
 	assert(records.length == 3);
 	assert(records[0].firstName == "Albert");
 
-	// Since TextRecords supports alias this we can also use collector directly without calling getRecords.
+	// Since TextRecords supports alias this we can also use collector directly without calling getRecordsRaw.
 	assert(collector.front.firstName == "Albert");
 	assert(collector.back.firstName == "Albert");
 	assert(collector.length == 3);
@@ -559,7 +561,7 @@ unittest
 	auto variedFoundRecords = variedCollector.findAll!(size_t, "id")(100);
 	assert(variedFoundRecords.length == 3);
 
-	auto variedRecords = variedCollector.getRecords();
+	auto variedRecords = variedCollector.getRecordsRaw();
 	variedCollector.dump();
 
 	immutable bool canFindValue = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
