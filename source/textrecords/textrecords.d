@@ -204,11 +204,35 @@ struct TextRecords(T)
 		Returns:
 			An array of records.
 	*/
-	auto getRecords()
+	auto getRecordsRaw()
 	{
 		return recordArray_;
 	}
 
+	alias getRecords = getRecordsRaw; // FIXME: Remove once deprecated phase is over.
+
+	/**
+		Returns an array of records.
+
+		Returns:
+			An array of records.
+	*/
+	ref auto getRecordsRawRef()
+	{
+		return recordArray_;
+	}
+
+	/**
+		Finds a record(s).
+
+		Params:
+			value = The value to look for in recordField.
+			amount = The number of results to return. Note passing zero will return all the results.
+
+		Returns:
+			The results of the query.
+
+	*/
 	auto find(S, alias recordField)(const S value, size_t amount = 1)
 	{
 		auto found = filter!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]).array;
@@ -221,11 +245,28 @@ struct TextRecords(T)
 		return found;
 	}
 
+	/**
+		Just an overload of find that returns all results.
+
+		Params:
+			value = The value to look for in recordField.
+
+		Returns:
+			The results of the query.
+	*/
 	auto findAll(S, alias recordField)(const S value)
 	{
 		return find!(S, recordField)(value, 0);
 	}
 
+	/**
+			Removes a record(s).
+
+			Params:
+				value = The value to remove in recordField.
+				removeCount = The number of values to remove. Note passing zero will remove everything.
+
+	*/
 	void remove(S, alias recordField)(const S value, size_t removeCount = 1)
 	{
 		auto found = StdFind!((T data, S fieldValue) => mixin("data." ~ recordField) == fieldValue)(recordArray_[], value);
@@ -240,16 +281,34 @@ struct TextRecords(T)
 		}
 	}
 
+	/**
+		Just an overload of remove that removes everything.
+
+		Params:
+			value = The value to remove in recordField.
+	*/
 	void removeAll(S, alias recordField)(const S value)
 	{
 		remove!(S, recordField)(value, 0);
 	}
 
+	/**
+		Determines if a value is found in a recordField.
+
+		Returns:
+			true if found false otherwise.
+	*/
 	bool hasValue(S, alias recordField)(const S value)
 	{
 		return canFind!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]);
 	}
 
+	/**
+		Inserts a struct of type T into the record array.
+
+		Params:
+			value = The value to insert of type T.
+	*/
 	void insert(T value)
 	{
 		recordArray_.insert(value);
@@ -427,14 +486,14 @@ unittest
 	TextRecords!NameData collector;
 	collector.parse(data);
 
-	auto records = collector.getRecords();
+	auto records = collector.getRecordsRaw();
 
 	assert(records.front.firstName == "Albert");
 	assert(records.back.firstName == "Albert");
 	assert(records.length == 3);
 	assert(records[0].firstName == "Albert");
 
-	// Since TextRecords supports alias this we can also use collector directly without calling getRecords.
+	// Since TextRecords supports alias this we can also use collector directly without calling getRecordsRaw.
 	assert(collector.front.firstName == "Albert");
 	assert(collector.back.firstName == "Albert");
 	assert(collector.length == 3);
@@ -502,7 +561,7 @@ unittest
 	auto variedFoundRecords = variedCollector.findAll!(size_t, "id")(100);
 	assert(variedFoundRecords.length == 3);
 
-	auto variedRecords = variedCollector.getRecords();
+	auto variedRecords = variedCollector.getRecordsRaw();
 	variedCollector.dump();
 
 	immutable bool canFindValue = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
