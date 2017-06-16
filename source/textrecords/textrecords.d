@@ -210,6 +210,17 @@ struct TextRecords(T)
 	}
 
 	/**
+		Returns an array of records.
+
+		Returns:
+			An array of records.
+	*/
+	ref auto getRecordsRawRef()
+	{
+		return recordArray_;
+	}
+
+	/**
 		Finds a record(s).
 
 		Params:
