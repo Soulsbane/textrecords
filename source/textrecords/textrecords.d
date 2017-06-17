@@ -199,10 +199,10 @@ struct TextRecords(T)
 	}
 
 	/**
-		Returns an array of records.
+		Returns the array of records.
 
 		Returns:
-			An array of records.
+			The array of records.
 	*/
 	auto getRecordsRaw()
 	{
@@ -212,10 +212,10 @@ struct TextRecords(T)
 	alias getRecords = getRecordsRaw; // FIXME: Remove once deprecated phase is over.
 
 	/**
-		Returns an array of records.
+		Returns a reference to the array of records.
 
 		Returns:
-			An array of records.
+			An reference to the array of records.
 	*/
 	ref auto getRecordsRawRef()
 	{
