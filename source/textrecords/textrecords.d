@@ -199,10 +199,10 @@ struct TextRecords(T)
 	}
 
 	/**
-		Returns an array of records.
+		Returns the array of records.
 
 		Returns:
-			An array of records.
+			The array of records.
 	*/
 	auto getRecordsRaw()
 	{
@@ -212,10 +212,10 @@ struct TextRecords(T)
 	alias getRecords = getRecordsRaw; // FIXME: Remove once deprecated phase is over.
 
 	/**
-		Returns an array of records.
+		Returns a reference to the array of records.
 
 		Returns:
-			An array of records.
+			An reference to the array of records.
 	*/
 	ref auto getRecordsRawRef()
 	{
@@ -257,6 +257,17 @@ struct TextRecords(T)
 	auto findAll(S, alias recordField)(const S value)
 	{
 		return find!(S, recordField)(value, 0);
+	}
+
+	void update(S, string recordField, alias predicate)(const S value, size_t amount = 1)
+	{
+		foreach(ref record; recordArray_)
+		{
+			if(predicate(record))
+			{
+				mixin("record." ~ recordField ~ " = " ~ "value;");
+			}
+		}
 	}
 
 	/**
@@ -628,4 +639,9 @@ unittest
 
 	auto nickNameRecords = irrCollector.findAllByNickName("hikki");
 	assert(nickNameRecords[0].realName == "Utada Hikaru");
+
+	//irrCollector.update!(size_t, q{ (T data) => data.id == 122 })(333, 0);
+	//irrCollector.update!(size_t, (IrregularNames data) => data.id == 122 && data.nickName == "Liz")(333, 0);
+	irrCollector.update!(size_t, "id", (IrregularNames data) => data.id == 122 && data.nickName == "Liz")(333, 0);
+	irrCollector.dump();
 }
