@@ -1,7 +1,7 @@
-##Description
+## Description
 A simple text based record database.
 
-##Example 1
+## Example 1
 ```d
      immutable string data =
     q{
@@ -54,12 +54,9 @@ A simple text based record database.
 
 	writeln("Saving...");
 	collector.save("test.data");
-
-##Example
-
 ```
 
-##Example 2
+## Example 2
 ```d
 	immutable string variedData =
 	q{
