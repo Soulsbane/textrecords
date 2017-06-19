@@ -259,15 +259,50 @@ struct TextRecords(T)
 		return find!(S, recordField)(value, 0);
 	}
 
+	void update(S, string recordField)(const S valueToFind, const S value, size_t amount = 1)
+	{
+		size_t counter;
+
+		foreach(ref record; recordArray_)
+		{
+			if(mixin("record." ~ recordField ~ " == " ~ "value;"))
+			{
+				if(counter <= amount || amount == 0)
+				{
+					mixin("record." ~ recordField ~ " = " ~ "value;");
+				}
+			}
+
+			++counter;
+		}
+	}
+
+	void updateAll(S, string recordField)(const S valueToFind, const S value)
+	{
+		update!(S, recordField)(valueToFind, value, 0);
+	}
+
 	void update(S, string recordField, alias predicate)(const S value, size_t amount = 1)
 	{
+		size_t counter;
+
 		foreach(ref record; recordArray_)
 		{
 			if(predicate(record))
 			{
-				mixin("record." ~ recordField ~ " = " ~ "value;");
+				if(counter <= amount || amount == 0)
+				{
+					mixin("record." ~ recordField ~ " = " ~ "value;");
+				}
 			}
+
+			++counter;
 		}
+	}
+
+	void updateAll(S, string recordField, alias predicate)(const S value, size_t amount = 1)
+	{
+		update!(S, recordField, predicate)(value, 0);
 	}
 
 	/**
