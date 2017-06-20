@@ -490,7 +490,6 @@ private string generateUpdateMethodCode(T)()
 			}
 		}, memNameCapitalized, memType, memType, memType, memName);
 
-		debug code ~= "\n\n";
 		code ~= format(q{
 			void updateAllBy%s(const %s valueToFind, const %s value)
 			{
@@ -498,7 +497,6 @@ private string generateUpdateMethodCode(T)()
 			}
 		}, memNameCapitalized, memType, memType, memType, memName);
 
-		debug code ~= "\n\n";
 		code ~= format(q{
 			void update(string recordField)(const %s valueToFind, const %s value, size_t amount = 1)
 			{
@@ -506,7 +504,7 @@ private string generateUpdateMethodCode(T)()
 			}
 		}, memType, memType, memType);
 
-		debug code ~= format(q{
+		code ~= format(q{
 			void updateAll(string recordField)(const %s valueToFind, const %s value, size_t amount = 1)
 			{
 				updateAll!(%s, recordField)(valueToFind, value, amount);
