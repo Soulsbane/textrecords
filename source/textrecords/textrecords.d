@@ -510,12 +510,13 @@ private string generateUpdateMethodNameCode(T)()
 		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
-			void updateBy%s(const %s valueToFind, const %s value)
+			void updateBy%s(const %s valueToFind, const %s value, size_t amount = 1)
 			{
-				update!(%s, "%s")(valueToFind, value);
+				update!(%s, "%s")(valueToFind, value, amount);
 			}
 		}, memNameCapitalized, memType, memType, memType, memName);
 
+		debug code ~= "\n\n";
 		code ~= format(q{
 			void updateAllBy%s(const %s valueToFind, const %s value)
 			{
@@ -523,19 +524,20 @@ private string generateUpdateMethodNameCode(T)()
 			}
 		}, memNameCapitalized, memType, memType, memType, memName);
 
-		/*code ~= format(q{
-			void update(string recordType)(const %s valueToFind, const %s value)
-			{
-				update!(%s, "%s")(valueToFind, value);
-			}
-		}, memType, memType, memType, memName);
-
+		debug code ~= "\n\n";
 		code ~= format(q{
-			void updateAllBy%s(const %s valueToFind, const %s value)
+			void update(string recordField)(const %s valueToFind, const %s value, size_t amount = 1)
 			{
-				updateAll!(%s, "%s")(valueToFind, value);
+				update!(%s, recordField)(valueToFind, value, amount);
 			}
-		}, memNameCapitalized, memType, memType, memType, memName);*/
+		}, memType, memType, memType);
+
+		debug code ~= format(q{
+			void updateAll(string recordField)(const %s valueToFind, const %s value, size_t amount = 1)
+			{
+				updateAll!(%s, recordField)(valueToFind, value, amount);
+			}
+		},  memType, memType, memType);
 	}
 
 	return code;
@@ -727,4 +729,9 @@ unittest
 	writeln;
 	irrCollector.updateAllById(100, 666);
 	irrCollector.dump();
+
+	writeln;
+	writeln;
+	writeln;
+	writeln(generateUpdateMethodNameCode!IrregularNames);
 }
