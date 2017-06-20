@@ -300,7 +300,7 @@ struct TextRecords(T)
 		}
 	}
 
-	void updateAll(S, string recordField, alias predicate)(const S value, size_t amount = 1)
+	void updateAll(S, string recordField, alias predicate)(const S value)
 	{
 		update!(S, recordField, predicate)(value, 0);
 	}
