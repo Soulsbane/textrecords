@@ -363,7 +363,7 @@ struct TextRecords(T)
 	mixin(generateInsertMethod!T);
 	mixin(generateFindMethodNameCode!T);
 	mixin(generateFindAllMethodNameCode!T);
-	mixin(generateUpdateMethodNameCode!T);
+	mixin(generateUpdateMethodCode!T);
 
 	RecordArray recordArray_;
 	alias recordArray_ this;
@@ -499,7 +499,7 @@ private string generateFindAllMethodNameCode(T)()
 	return code;
 }
 
-private string generateUpdateMethodNameCode(T)()
+private string generateUpdateMethodCode(T)()
 {
 	string code;
 
@@ -733,5 +733,5 @@ unittest
 	writeln;
 	writeln;
 	writeln;
-	writeln(generateUpdateMethodNameCode!IrregularNames);
+	writeln(generateUpdateMethodCode!IrregularNames);
 }
