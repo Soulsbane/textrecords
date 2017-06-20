@@ -265,7 +265,7 @@ struct TextRecords(T)
 
 		foreach(ref record; recordArray_)
 		{
-			if(mixin("record." ~ recordField ~ " == " ~ "value;"))
+			if(mixin("record." ~ recordField ~ " == " ~ "valueToFind"))
 			{
 				if(counter <= amount || amount == 0)
 				{
