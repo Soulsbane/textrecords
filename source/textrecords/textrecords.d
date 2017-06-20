@@ -259,15 +259,50 @@ struct TextRecords(T)
 		return find!(S, recordField)(value, 0);
 	}
 
+	void update(S, string recordField)(const S valueToFind, const S value, size_t amount = 1)
+	{
+		size_t counter;
+
+		foreach(ref record; recordArray_)
+		{
+			if(mixin("record." ~ recordField ~ " == " ~ "valueToFind"))
+			{
+				if(counter <= amount || amount == 0)
+				{
+					mixin("record." ~ recordField ~ " = " ~ "value;");
+				}
+			}
+
+			++counter;
+		}
+	}
+
+	void updateAll(S, string recordField)(const S valueToFind, const S value)
+	{
+		update!(S, recordField)(valueToFind, value, 0);
+	}
+
 	void update(S, string recordField, alias predicate)(const S value, size_t amount = 1)
 	{
+		size_t counter;
+
 		foreach(ref record; recordArray_)
 		{
 			if(predicate(record))
 			{
-				mixin("record." ~ recordField ~ " = " ~ "value;");
+				if(counter <= amount || amount == 0)
+				{
+					mixin("record." ~ recordField ~ " = " ~ "value;");
+				}
 			}
+
+			++counter;
 		}
+	}
+
+	void updateAll(S, string recordField, alias predicate)(const S value, size_t amount = 1)
+	{
+		update!(S, recordField, predicate)(value, 0);
 	}
 
 	/**
@@ -328,6 +363,7 @@ struct TextRecords(T)
 	mixin(generateInsertMethod!T);
 	mixin(generateFindMethodNameCode!T);
 	mixin(generateFindAllMethodNameCode!T);
+	mixin(generateUpdateMethodNameCode!T);
 
 	RecordArray recordArray_;
 	alias recordArray_ this;
@@ -458,6 +494,50 @@ private string generateFindAllMethodNameCode(T)()
 				return find!(%s, "%s")(value, 0);
 			}
 		}, memNameCapitalized, memType, memType, memName);
+	}
+
+	return code;
+}
+
+private string generateUpdateMethodNameCode(T)()
+{
+	string code;
+
+	foreach (i, memberType; typeof(T.tupleof))
+	{
+		immutable string memType = memberType.stringof;
+		immutable string memName = T.tupleof[i].stringof;
+		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
+
+		code ~= format(q{
+			void updateBy%s(const %s valueToFind, const %s value, size_t amount = 1)
+			{
+				update!(%s, "%s")(valueToFind, value, amount);
+			}
+		}, memNameCapitalized, memType, memType, memType, memName);
+
+		debug code ~= "\n\n";
+		code ~= format(q{
+			void updateAllBy%s(const %s valueToFind, const %s value)
+			{
+				updateAll!(%s, "%s")(valueToFind, value);
+			}
+		}, memNameCapitalized, memType, memType, memType, memName);
+
+		debug code ~= "\n\n";
+		code ~= format(q{
+			void update(string recordField)(const %s valueToFind, const %s value, size_t amount = 1)
+			{
+				update!(%s, recordField)(valueToFind, value, amount);
+			}
+		}, memType, memType, memType);
+
+		debug code ~= format(q{
+			void updateAll(string recordField)(const %s valueToFind, const %s value, size_t amount = 1)
+			{
+				updateAll!(%s, recordField)(valueToFind, value, amount);
+			}
+		},  memType, memType, memType);
 	}
 
 	return code;
@@ -644,4 +724,14 @@ unittest
 	//irrCollector.update!(size_t, (IrregularNames data) => data.id == 122 && data.nickName == "Liz")(333, 0);
 	irrCollector.update!(size_t, "id", (IrregularNames data) => data.id == 122 && data.nickName == "Liz")(333, 0);
 	irrCollector.dump();
+
+	writeln;
+	writeln;
+	irrCollector.updateAllById(100, 666);
+	irrCollector.dump();
+
+	writeln;
+	writeln;
+	writeln;
+	writeln(generateUpdateMethodNameCode!IrregularNames);
 }
