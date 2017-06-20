@@ -519,9 +519,9 @@ private string generateUpdateMethodCode(T)()
 		}, memType, memType, memType);
 
 		code ~= format(q{
-			void updateAll(string recordField)(const %s valueToFind, const %s value, size_t amount = 1)
+			void updateAll(string recordField)(const %s valueToFind, const %s value)
 			{
-				updateAll!(%s, recordField)(valueToFind, value, amount);
+				updateAll!(%s, recordField)(valueToFind, value);
 			}
 		},  memType, memType, memType);
 	}
