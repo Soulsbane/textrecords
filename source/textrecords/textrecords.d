@@ -361,9 +361,9 @@ struct TextRecords(T)
 	}
 
 	mixin(generateInsertMethod!T);
-	mixin(generateFindMethodNameCode!T);
-	mixin(generateFindAllMethodNameCode!T);
+	mixin(generateFindMethodCode!T);
 	mixin(generateUpdateMethodCode!T);
+	// TODO: Add remove method code generation.
 
 	RecordArray recordArray_;
 	alias recordArray_ this;
@@ -438,9 +438,14 @@ private string generateInsertMethod(T)()
 		return find!(string, "name")(value);
 	}
 
+	void findByNameAll(const string value)
+	{
+		return find!(string, "name")(value);
+	}
+
 	it does this for each member of the struct.
 */
-private string generateFindMethodNameCode(T)()
+private string generateFindMethodCode(T)()
 {
 	string code;
 
@@ -456,37 +461,6 @@ private string generateFindMethodNameCode(T)()
 				return find!(%s, "%s")(value);
 			}
 		}, memNameCapitalized, memType, memType, memName);
-	}
-
-	return code;
-}
-
-/*
-	This generates an findAll method based on a structs member names. For example this struct:
-
-	struct Test
-	{
-		string name;
-	}
-
-	will generate this code:
-
-	void findByNameAll(const string value)
-	{
-		return find!(string, "name")(value);
-	}
-
-	it does this for each member of the struct.
-*/
-private string generateFindAllMethodNameCode(T)()
-{
-	string code;
-
-	foreach (i, memberType; typeof(T.tupleof))
-	{
-		immutable string memType = memberType.stringof;
-		immutable string memName = T.tupleof[i].stringof;
-		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
 			auto findAllBy%s(const %s value)
@@ -730,8 +704,6 @@ unittest
 	irrCollector.updateAllById(100, 666);
 	irrCollector.dump();
 
-	writeln;
-	writeln;
-	writeln;
-	writeln(generateUpdateMethodCode!IrregularNames);
+	debug writeln; writeln; writeln;
+	debug writeln(generateFindMethodCode!IrregularNames);
 }
