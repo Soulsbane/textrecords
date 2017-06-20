@@ -468,6 +468,20 @@ private string generateFindMethodCode(T)()
 				return find!(%s, "%s")(value, 0);
 			}
 		}, memNameCapitalized, memType, memType, memName);
+
+		code ~= format(q{
+			auto find(string recordField)(const %s value, size_t amount = 1)
+			{
+				return find!(%s, recordField)(value, amount);
+			}
+		}, memType, memType);
+
+		code ~= format(q{
+			auto findAll(string recordField)(const %s value, size_t amount = 1)
+			{
+				return findAll!(%s, recordField)(value);
+			}
+		}, memType, memType);
 	}
 
 	return code;
@@ -692,16 +706,17 @@ unittest
 	auto nickNameRecords = irrCollector.findAllByNickName("hikki");
 	assert(nickNameRecords[0].realName == "Utada Hikaru");
 
-	//irrCollector.update!(size_t, q{ (T data) => data.id == 122 })(333, 0);
-	//irrCollector.update!(size_t, (IrregularNames data) => data.id == 122 && data.nickName == "Liz")(333, 0);
 	irrCollector.update!(size_t, "id", (IrregularNames data) => data.id == 122 && data.nickName == "Liz")(333, 0);
-	irrCollector.dump();
+	auto idChange = irrCollector.findById(333);
+	assert(idChange.length == 1);
 
-	writeln;
-	writeln;
 	irrCollector.updateAllById(100, 666);
-	irrCollector.dump();
+	idChange = irrCollector.findAllById(666);
+	assert(idChange.length == 2);
+
+	idChange = irrCollector.findAll!("id")(666);
+	assert(idChange.length == 2);
 
 	debug writeln; writeln; writeln;
-	debug writeln(generateFindMethodCode!IrregularNames);
+	//debug writeln(generateFindMethodCode!IrregularNames);
 }
