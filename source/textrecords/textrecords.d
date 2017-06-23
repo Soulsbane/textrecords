@@ -233,7 +233,7 @@ struct TextRecords(T)
 			The results of the query.
 
 	*/
-	auto find(S, alias recordField)(const S value, size_t amount = 1)
+	auto find(S, string recordField)(const S value, size_t amount = 1)
 	{
 		auto found = filter!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]).array;
 
@@ -254,7 +254,7 @@ struct TextRecords(T)
 		Returns:
 			The results of the query.
 	*/
-	auto findAll(S, alias recordField)(const S value)
+	auto findAll(S, string recordField)(const S value)
 	{
 		return find!(S, recordField)(value, 0);
 	}
