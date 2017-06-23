@@ -246,6 +246,44 @@ struct TextRecords(T)
 	}
 
 	/**
+		Finds a record(s).
+
+		Params:
+			predicate = The lambda to use to filter results.
+			amount = The number of results to return. Note passing zero will return all the results.
+
+		Returns:
+			The results of the query.
+
+	*/
+	auto find(S, alias predicate)(size_t amount = 1)
+	{
+		//auto found = filter!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]).array;
+		auto found = filter!(predicate)(recordArray_[]).array;
+
+		if(amount != 0)
+		{
+			return found.take(amount);
+		}
+
+		return found;
+	}
+
+	/**
+		Just an overload of find that returns all results.
+
+		Params:
+			predicate = The lambda to use to filter results.
+
+		Returns:
+			The results of the query.
+	*/
+	auto findAll(S, alias predicate)()
+	{
+		return find!(S, predicate)(0);
+	}
+
+	/**
 		Just an overload of find that returns all results.
 
 		Params:
@@ -729,6 +767,12 @@ unittest
 	assert(idChange.length == 2);
 
 	idChange = irrCollector.findAll!("id")(666);
+	assert(idChange.length == 2);
+
+	idChange = irrCollector.find!(size_t, (IrregularNames data) => data.id == 666)(0);
+	assert(idChange.length == 2);
+
+	idChange = irrCollector.findAll!(size_t, (IrregularNames data) => data.id == 666)();
 	assert(idChange.length == 2);
 
 	debug writeln; writeln; writeln;
