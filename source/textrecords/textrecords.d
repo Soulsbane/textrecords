@@ -563,18 +563,18 @@ private string generateUpdateMethodCode(T)()
 		},  memType, memType, memType);
 
 		code ~= format(q{
-			void update(string recordField, alias predicate)(const %s valueToFind, const %s value, size_t amount = 1)
+			void update(string recordField, alias predicate)(const %s value, size_t amount = 1)
 			{
 				update!(%s, recordField, predicate)(valueToFind, value, amount);
 			}
-		}, memType, memType, memType);
+		}, memType, memType);
 
 		code ~= format(q{
-			void updateAll(string recordField, predicate)(const %s valueToFind, const %s value)
+			void updateAll(string recordField, alias predicate)(const %s value)
 			{
 				updateAll!(%s, recordField, predicate)(valueToFind, value);
 			}
-		},  memType, memType, memType);
+		},  memType, memType);
 	}
 
 	return code;
