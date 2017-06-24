@@ -256,9 +256,8 @@ struct TextRecords(T)
 			The results of the query.
 
 	*/
-	auto find(S, alias predicate)(size_t amount = 1)
+	auto find(alias predicate)(size_t amount = 1)
 	{
-		//auto found = filter!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]).array;
 		auto found = filter!(predicate)(recordArray_[]).array;
 
 		if(amount != 0)
@@ -278,9 +277,9 @@ struct TextRecords(T)
 		Returns:
 			The results of the query.
 	*/
-	auto findAll(S, alias predicate)()
+	auto findAll(alias predicate)()
 	{
-		return find!(S, predicate)(0);
+		return find!(predicate)(0);
 	}
 
 	/**
@@ -769,12 +768,9 @@ unittest
 	idChange = irrCollector.findAll!("id")(666);
 	assert(idChange.length == 2);
 
-	idChange = irrCollector.find!(size_t, (IrregularNames data) => data.id == 666)(0);
+	idChange = irrCollector.find!((IrregularNames data) => data.id == 666)(0);
 	assert(idChange.length == 2);
 
-	idChange = irrCollector.findAll!(size_t, (IrregularNames data) => data.id == 666)();
+	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
 	assert(idChange.length == 2);
-
-	debug writeln; writeln; writeln;
-	//debug writeln(generateFindMethodCode!IrregularNames);
 }
