@@ -378,6 +378,10 @@ struct TextRecords(T)
 	/**
 		Determines if a value is found in a recordField.
 
+		Params:
+			recordField = The field used for finding the value.
+			value = The value to find.
+
 		Returns:
 			true if found false otherwise.
 	*/
