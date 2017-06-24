@@ -233,9 +233,32 @@ struct TextRecords(T)
 			The results of the query.
 
 	*/
-	auto find(S, alias recordField)(const S value, size_t amount = 1)
+	auto find(S, string recordField)(const S value, size_t amount = 1)
 	{
 		auto found = filter!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]).array;
+
+		if(amount != 0)
+		{
+			return found.take(amount);
+		}
+
+		return found;
+	}
+
+	/**
+		Finds a record(s).
+
+		Params:
+			predicate = The lambda to use to filter results.
+			amount = The number of results to return. Note passing zero will return all the results.
+
+		Returns:
+			The results of the query.
+
+	*/
+	auto find(alias predicate)(size_t amount = 1)
+	{
+		auto found = filter!(predicate)(recordArray_[]).array;
 
 		if(amount != 0)
 		{
@@ -249,12 +272,26 @@ struct TextRecords(T)
 		Just an overload of find that returns all results.
 
 		Params:
+			predicate = The lambda to use to filter results.
+
+		Returns:
+			The results of the query.
+	*/
+	auto findAll(alias predicate)()
+	{
+		return find!(predicate)(0);
+	}
+
+	/**
+		Just an overload of find that returns all results.
+
+		Params:
 			value = The value to look for in recordField.
 
 		Returns:
 			The results of the query.
 	*/
-	auto findAll(S, alias recordField)(const S value)
+	auto findAll(S, string recordField)(const S value)
 	{
 		return find!(S, recordField)(value, 0);
 	}
@@ -524,6 +561,20 @@ private string generateUpdateMethodCode(T)()
 				updateAll!(%s, recordField)(valueToFind, value);
 			}
 		},  memType, memType, memType);
+
+		code ~= format(q{
+			void update(string recordField, alias predicate)(const %s value, size_t amount = 1)
+			{
+				update!(%s, recordField, predicate)(valueToFind, value, amount);
+			}
+		}, memType, memType);
+
+		code ~= format(q{
+			void updateAll(string recordField, alias predicate)(const %s value)
+			{
+				updateAll!(%s, recordField, predicate)(valueToFind, value);
+			}
+		},  memType, memType);
 	}
 
 	return code;
@@ -717,6 +768,9 @@ unittest
 	idChange = irrCollector.findAll!("id")(666);
 	assert(idChange.length == 2);
 
-	debug writeln; writeln; writeln;
-	//debug writeln(generateFindMethodCode!IrregularNames);
+	idChange = irrCollector.find!((IrregularNames data) => data.id == 666)(0);
+	assert(idChange.length == 2);
+
+	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
+	assert(idChange.length == 2);
 }
