@@ -900,11 +900,11 @@ unittest
 	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
 	assert(idChange.length == 2);
 
-	writeln;writeln;
+	/*writeln;writeln;
 
 	struct One
 	{
 		string firstWord;
 	}
-	writeln(generateInsertMethod!One);
+	writeln(generateInsertMethod!One);*/
 }
