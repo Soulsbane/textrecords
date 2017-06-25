@@ -419,6 +419,7 @@ struct TextRecords(T)
 	mixin(generateInsertMethod!T);
 	mixin(generateFindMethodCode!T);
 	mixin(generateUpdateMethodCode!T);
+	mixin(generateHasMethodCode!T);
 	// TODO: Add remove method code generation.
 
 	RecordArray recordArray_;
@@ -599,6 +600,32 @@ private string generateUpdateMethodCode(T)()
 	return code;
 }
 
+private string generateHasMethodCode(T)()
+{
+	string code;
+
+	/*bool hasValue(S, alias recordField)(const S value)
+	{
+		return canFind!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]);
+	}*/
+
+	foreach (i, memberType; typeof(T.tupleof))
+	{
+		immutable string memType = memberType.stringof;
+		immutable string memName = T.tupleof[i].stringof;
+		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
+
+		code ~= format(q{
+			bool has%s(const %s value)
+			{
+				return hasValue!(%s, "%s")(value);
+			}
+		}, memNameCapitalized, memType, memType, memName);
+	}
+
+	return code;
+}
+
 ///
 unittest
 {
@@ -715,6 +742,8 @@ unittest
 	assert(canFindValue == true);
 	canFindValue = variedCollector.hasValue!((VariedData data) => data.id == 100); // Somewhat easier to use than canFind.
 	assert(canFindValue == true);
+	canFindValue = variedCollector.hasId(100);
+	assert(canFindValue == true);
 
 	assert(variedCollector.findAllById(100).length == 3);
 
@@ -794,4 +823,6 @@ unittest
 
 	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
 	assert(idChange.length == 2);
+	//writeln;writeln;
+	//writeln(generateHasMethodCode!IrregularNames);
 }
