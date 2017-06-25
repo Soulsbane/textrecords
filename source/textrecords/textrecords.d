@@ -426,37 +426,35 @@ struct TextRecords(T)
 	alias recordArray_ this;
 }
 
+/**
+	Generates an insert method based on the members of T
+
+	Given this struct:
+
+	struct One
+	{
+		string firstWord;
+	}
+
+	The following methods will be generated:
+
+		void insert(string firstWord)
+		{
+			T data;
+
+			data.firstWord = firstWord;
+			insert(data);
+		}
+*/
 private string generateInsertMethod(T)()
 {
-	/*
-	Generates an insert method where the parameters are each field of T
-	For Example:
-
-	struct NameData
-	{
-		string firstName;
-		string lastName;
-	}
-
-	Will generate this function:
-
-	void insert(string firstName, string lastName)
-	{
-		NameData data;
-
-		data.firstName = firstName;
-		data.lastName = lastName;
-
-		insert(data);
-	}
-	*/
 	string code;
 
 	code = "void insert(";
 
 	foreach (index, memberType; typeof(T.tupleof))
 	{
-		code ~= memberType.stringof ~ " " ~ T.tupleof[index].stringof ~ ", ";
+		code ~= memberType.stringof ~ " " ~ T.tupleof[index].stringof ~ ",";
 	}
 
 	if(code.back == ',')
@@ -464,18 +462,18 @@ private string generateInsertMethod(T)()
 		code.popBack;
 	}
 
-	code ~= "){";
-	code ~= "T data;";
+	code ~= ")\n{\n";
+	code ~= "\tT data;\n\n";
 
 
 	foreach (index, memberType; typeof(T.tupleof))
 	{
 		string memberName = T.tupleof[index].stringof;
-		code ~= "data." ~  memberName ~ " = " ~ memberName ~ ";";
+		code ~= "\tdata." ~  memberName ~ " = " ~ memberName ~ ";\n";
 	}
 
-	code ~= "insert(data);";
-	code ~= "}";
+	code ~= "\tinsert(data);";
+	code ~= "\n}";
 
 	return code;
 }
@@ -901,11 +899,12 @@ unittest
 
 	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
 	assert(idChange.length == 2);
-	//writeln;writeln;
 
-	/*struct One
+	writeln;writeln;
+
+	struct One
 	{
 		string firstWord;
 	}
-	writeln(generateInsertMethod!One);*/
+	writeln(generateInsertMethod!One);
 }
