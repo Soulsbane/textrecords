@@ -604,11 +604,6 @@ private string generateHasMethodCode(T)()
 {
 	string code;
 
-	/*bool hasValue(S, alias recordField)(const S value)
-	{
-		return canFind!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]);
-	}*/
-
 	foreach (i, memberType; typeof(T.tupleof))
 	{
 		immutable string memType = memberType.stringof;
@@ -621,6 +616,13 @@ private string generateHasMethodCode(T)()
 				return hasValue!(%s, "%s")(value);
 			}
 		}, memNameCapitalized, memType, memType, memName);
+
+		code ~= format(q{
+			bool hasValue(string recordField)(const %s value)
+			{
+				return hasValue!(%s, "%s")(value);
+			}
+		}, memType, memType, memName);
 	}
 
 	return code;
@@ -743,6 +745,8 @@ unittest
 	canFindValue = variedCollector.hasValue!((VariedData data) => data.id == 100); // Somewhat easier to use than canFind.
 	assert(canFindValue == true);
 	canFindValue = variedCollector.hasId(100);
+	assert(canFindValue == true);
+	canFindValue = variedCollector.hasValue!("id")(100);
 	assert(canFindValue == true);
 
 	assert(variedCollector.findAllById(100).length == 3);
