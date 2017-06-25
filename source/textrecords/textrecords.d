@@ -391,6 +391,21 @@ struct TextRecords(T)
 	}
 
 	/**
+		Determines if a value is found in a recordField.
+
+		Params:
+			recordField = The field used for finding the value.
+			value = The value to find.
+
+		Returns:
+			true if found false otherwise.
+	*/
+	bool hasValue(alias predicate)()
+	{
+		return canFind!(predicate)(recordArray_[]);
+	}
+
+	/**
 		Inserts a struct of type T into the record array.
 
 		Params:
@@ -696,7 +711,9 @@ unittest
 	auto variedRecords = variedCollector.getRecordsRaw();
 	variedCollector.dump();
 
-	immutable bool canFindValue = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
+	bool canFindValue = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
+	assert(canFindValue == true);
+	canFindValue = variedCollector.hasValue!((VariedData data) => data.id == 100); // Somewhat easier to use than canFind.
 	assert(canFindValue == true);
 
 	assert(variedCollector.findAllById(100).length == 3);
