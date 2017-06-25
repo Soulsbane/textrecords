@@ -480,27 +480,37 @@ private string generateInsertMethod(T)()
 	return code;
 }
 
-/*
-	This generates an find method based on a structs member names. For example this struct:
+/**
+	Generates various find methods.
 
-	struct Test
+	Given this struct:
+
+	struct One
 	{
-		string name;
+		string firstWord;
 	}
 
-	will generate this code:
+	The following methods will be generated:
 
-	void findByName(const string value)
+	auto findByFirstWord(const string value)
 	{
-		return find!(string, "name")(value);
+		return find!(string, "firstWord")(value);
 	}
 
-	void findByNameAll(const string value)
+	auto findAllByFirstWord(const string value)
 	{
-		return find!(string, "name")(value);
+		return find!(string, "firstWord")(value, 0);
 	}
 
-	it does this for each member of the struct.
+	auto find(string recordField)(const string value, size_t amount = 1)
+	{
+		return find!(string, recordField)(value, amount);
+	}
+
+	auto findAll(string recordField)(const string value, size_t amount = 1)
+	{
+		return findAll!(string, recordField)(value);
+	}
 */
 private string generateFindMethodCode(T)()
 {
@@ -544,6 +554,48 @@ private string generateFindMethodCode(T)()
 	return code;
 }
 
+/**
+	Generates various update methods.
+
+	Given this struct:
+
+	struct One
+	{
+		string firstWord;
+	}
+
+	The following methods will be generated:
+
+	void updateByFirstWord(const string valueToFind, const string value, size_t amount = 1)
+	{
+		update!(string, "firstWord")(valueToFind, value, amount);
+	}
+
+	void updateAllByFirstWord(const string valueToFind, const string value)
+	{
+		updateAll!(string, "firstWord")(valueToFind, value);
+	}
+
+	void update(string recordField)(const string valueToFind, const string value, size_t amount = 1)
+	{
+		update!(string, recordField)(valueToFind, value, amount);
+	}
+
+	void updateAll(string recordField)(const string valueToFind, const string value)
+	{
+		updateAll!(string, recordField)(valueToFind, value);
+	}
+
+	void update(string recordField, alias predicate)(const string value, size_t amount = 1)
+	{
+		update!(string, recordField, predicate)(valueToFind, value, amount);
+	}
+
+	void updateAll(string recordField, alias predicate)(const string value)
+	{
+		updateAll!(string, recordField, predicate)(valueToFind, value);
+	}
+*/
 private string generateUpdateMethodCode(T)()
 {
 	string code;
@@ -599,7 +651,29 @@ private string generateUpdateMethodCode(T)()
 
 	return code;
 }
+/**
+	Generates various hasValue methods.
 
+	Given this struct:
+
+	struct One
+	{
+		string firstWord;
+	}
+
+	The following methods will be generated:
+
+	bool hasFirstWord(const string value)
+	{
+		return hasValue!(string, "firstWord")(value);
+	}
+
+	bool hasValue(string recordField)(const string value)
+	{
+		return hasValue!(string, "firstWord")(value);
+	}
+
+*/
 private string generateHasMethodCode(T)()
 {
 	string code;
@@ -828,5 +902,10 @@ unittest
 	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
 	assert(idChange.length == 2);
 	//writeln;writeln;
-	//writeln(generateHasMethodCode!IrregularNames);
+
+	/*struct One
+	{
+		string firstWord;
+	}
+	writeln(generateInsertMethod!One);*/
 }
