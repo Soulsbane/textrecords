@@ -350,7 +350,7 @@ struct TextRecords(T)
 				removeCount = The number of values to remove. Note passing zero will remove everything.
 
 	*/
-	void remove(S, alias recordField)(const S value, size_t removeCount = 1)
+	void remove(S, string recordField)(const S value, size_t removeCount = 1)
 	{
 		auto found = StdFind!((T data, S fieldValue) => mixin("data." ~ recordField) == fieldValue)(recordArray_[], value);
 
@@ -370,7 +370,7 @@ struct TextRecords(T)
 		Params:
 			value = The value to remove in recordField.
 	*/
-	void removeAll(S, alias recordField)(const S value)
+	void removeAll(S, string recordField)(const S value)
 	{
 		remove!(S, recordField)(value, 0);
 	}
@@ -385,7 +385,7 @@ struct TextRecords(T)
 		Returns:
 			true if found false otherwise.
 	*/
-	bool hasValue(S, alias recordField)(const S value)
+	bool hasValue(S, string recordField)(const S value)
 	{
 		return canFind!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]);
 	}
