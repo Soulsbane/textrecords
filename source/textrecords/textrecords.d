@@ -13,6 +13,8 @@ import std.range;
 import std.array;
 import std.format;
 import std.string;
+import std.path : exists;
+import std.file : readText;
 
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
 alias StdFind = std.algorithm.searching.find;
@@ -105,15 +107,41 @@ struct TextRecords(T)
 
 		Params:
 			records = The string of records to process.
+	*/
+	void parse(const string records)
+	{
+		auto lines = records.lineSplitter();
+		StringArray strArray;
+
+		foreach(line; lines)
+		{
+			if(line.canFind("{"))
+			{
+				strArray.clear();
+			}
+			else if(line.canFind("}"))
+			{
+				recordArray_.insert(convertToRecord(strArray));
+			}
+			else
+			{
+				strArray.insert(line);
+			}
+		}
+	}
+
+	/**
+		Parses a string into an array of records.
+
+		Params:
+			records = The string of records to process.
 
 		Returns:
 			An $(LINK2 http://dlang.org/phobos/std_container_array.html, std.container.Array) of records.
 	*/
-	RecordArray parse(const string records)
+	RecordArray parseRaw(const string records)
 	{
-		import std.algorithm : canFind;
 		auto lines = records.lineSplitter();
-
 		StringArray strArray;
 
 		foreach(line; lines)
@@ -142,9 +170,28 @@ struct TextRecords(T)
 			fileName = The name of the file to parse.
 
 		Returns:
+			true if parsing succeeded false otherwise.
+	*/
+	bool parseFile(const string fileName)
+	{
+		if(fileName.exists)
+		{
+			parse(fileName.readText);
+		}
+
+		return false;
+	}
+
+	/**
+		Loads a file of records and parses it.
+
+		Params:
+			fileName = The name of the file to parse.
+
+		Returns:
 			An $(LINK2 http://dlang.org/phobos/std_container_array.html, std.container.Array) of records.
 	*/
-	RecordArray parseFile(const string fileName)
+	RecordArray parseFileRaw(const string fileName)
 	{
 		import std.path : exists;
 		import std.file : readText;
@@ -153,7 +200,7 @@ struct TextRecords(T)
 
 		if(fileName.exists)
 		{
-			recArray = parse(fileName.readText);
+			recArray = parseRaw(fileName.readText);
 		}
 
 		return recArray;
