@@ -350,7 +350,7 @@ struct TextRecords(T)
 				removeCount = The number of values to remove. Note passing zero will remove everything.
 
 	*/
-	void remove(S, alias recordField)(const S value, size_t removeCount = 1)
+	void remove(S, string recordField)(const S value, size_t removeCount = 1)
 	{
 		auto found = StdFind!((T data, S fieldValue) => mixin("data." ~ recordField) == fieldValue)(recordArray_[], value);
 
@@ -370,7 +370,7 @@ struct TextRecords(T)
 		Params:
 			value = The value to remove in recordField.
 	*/
-	void removeAll(S, alias recordField)(const S value)
+	void removeAll(S, string recordField)(const S value)
 	{
 		remove!(S, recordField)(value, 0);
 	}
@@ -385,7 +385,7 @@ struct TextRecords(T)
 		Returns:
 			true if found false otherwise.
 	*/
-	bool hasValue(S, alias recordField)(const S value)
+	bool hasValue(S, string recordField)(const S value)
 	{
 		return canFind!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]);
 	}
@@ -426,37 +426,35 @@ struct TextRecords(T)
 	alias recordArray_ this;
 }
 
+/**
+	Generates an insert method based on the members of T
+
+	Given this struct:
+
+	struct One
+	{
+		string firstWord;
+	}
+
+	The following methods will be generated:
+
+		void insert(string firstWord)
+		{
+			T data;
+
+			data.firstWord = firstWord;
+			insert(data);
+		}
+*/
 private string generateInsertMethod(T)()
 {
-	/*
-	Generates an insert method where the parameters are each field of T
-	For Example:
-
-	struct NameData
-	{
-		string firstName;
-		string lastName;
-	}
-
-	Will generate this function:
-
-	void insert(string firstName, string lastName)
-	{
-		NameData data;
-
-		data.firstName = firstName;
-		data.lastName = lastName;
-
-		insert(data);
-	}
-	*/
 	string code;
 
 	code = "void insert(";
 
 	foreach (index, memberType; typeof(T.tupleof))
 	{
-		code ~= memberType.stringof ~ " " ~ T.tupleof[index].stringof ~ ", ";
+		code ~= memberType.stringof ~ " " ~ T.tupleof[index].stringof ~ ",";
 	}
 
 	if(code.back == ',')
@@ -464,43 +462,53 @@ private string generateInsertMethod(T)()
 		code.popBack;
 	}
 
-	code ~= "){";
-	code ~= "T data;";
+	code ~= ")\n{\n";
+	code ~= "\tT data;\n\n";
 
 
 	foreach (index, memberType; typeof(T.tupleof))
 	{
 		string memberName = T.tupleof[index].stringof;
-		code ~= "data." ~  memberName ~ " = " ~ memberName ~ ";";
+		code ~= "\tdata." ~  memberName ~ " = " ~ memberName ~ ";\n";
 	}
 
-	code ~= "insert(data);";
-	code ~= "}";
+	code ~= "\tinsert(data);";
+	code ~= "\n}";
 
 	return code;
 }
 
-/*
-	This generates an find method based on a structs member names. For example this struct:
+/**
+	Generates various find methods.
 
-	struct Test
+	Given this struct:
+
+	struct One
 	{
-		string name;
+		string firstWord;
 	}
 
-	will generate this code:
+	The following methods will be generated:
 
-	void findByName(const string value)
+	auto findByFirstWord(const string value)
 	{
-		return find!(string, "name")(value);
+		return find!(string, "firstWord")(value);
 	}
 
-	void findByNameAll(const string value)
+	auto findAllByFirstWord(const string value)
 	{
-		return find!(string, "name")(value);
+		return find!(string, "firstWord")(value, 0);
 	}
 
-	it does this for each member of the struct.
+	auto find(string recordField)(const string value, size_t amount = 1)
+	{
+		return find!(string, recordField)(value, amount);
+	}
+
+	auto findAll(string recordField)(const string value, size_t amount = 1)
+	{
+		return findAll!(string, recordField)(value);
+	}
 */
 private string generateFindMethodCode(T)()
 {
@@ -544,6 +552,48 @@ private string generateFindMethodCode(T)()
 	return code;
 }
 
+/**
+	Generates various update methods.
+
+	Given this struct:
+
+	struct One
+	{
+		string firstWord;
+	}
+
+	The following methods will be generated:
+
+	void updateByFirstWord(const string valueToFind, const string value, size_t amount = 1)
+	{
+		update!(string, "firstWord")(valueToFind, value, amount);
+	}
+
+	void updateAllByFirstWord(const string valueToFind, const string value)
+	{
+		updateAll!(string, "firstWord")(valueToFind, value);
+	}
+
+	void update(string recordField)(const string valueToFind, const string value, size_t amount = 1)
+	{
+		update!(string, recordField)(valueToFind, value, amount);
+	}
+
+	void updateAll(string recordField)(const string valueToFind, const string value)
+	{
+		updateAll!(string, recordField)(valueToFind, value);
+	}
+
+	void update(string recordField, alias predicate)(const string value, size_t amount = 1)
+	{
+		update!(string, recordField, predicate)(valueToFind, value, amount);
+	}
+
+	void updateAll(string recordField, alias predicate)(const string value)
+	{
+		updateAll!(string, recordField, predicate)(valueToFind, value);
+	}
+*/
 private string generateUpdateMethodCode(T)()
 {
 	string code;
@@ -599,15 +649,32 @@ private string generateUpdateMethodCode(T)()
 
 	return code;
 }
+/**
+	Generates various hasValue methods.
 
+	Given this struct:
+
+	struct One
+	{
+		string firstWord;
+	}
+
+	The following methods will be generated:
+
+	bool hasFirstWord(const string value)
+	{
+		return hasValue!(string, "firstWord")(value);
+	}
+
+	bool hasValue(string recordField)(const string value)
+	{
+		return hasValue!(string, "firstWord")(value);
+	}
+
+*/
 private string generateHasMethodCode(T)()
 {
 	string code;
-
-	/*bool hasValue(S, alias recordField)(const S value)
-	{
-		return canFind!((T data) => mixin("data." ~ recordField) == value)(recordArray_[]);
-	}*/
 
 	foreach (i, memberType; typeof(T.tupleof))
 	{
@@ -621,6 +688,13 @@ private string generateHasMethodCode(T)()
 				return hasValue!(%s, "%s")(value);
 			}
 		}, memNameCapitalized, memType, memType, memName);
+
+		code ~= format(q{
+			bool hasValue(string recordField)(const %s value)
+			{
+				return hasValue!(%s, "%s")(value);
+			}
+		}, memType, memType, memName);
 	}
 
 	return code;
@@ -744,6 +818,8 @@ unittest
 	assert(canFindValue == true);
 	canFindValue = variedCollector.hasId(100);
 	assert(canFindValue == true);
+	canFindValue = variedCollector.hasValue!("id")(100);
+	assert(canFindValue == true);
 
 	assert(variedCollector.findAllById(100).length == 3);
 
@@ -823,6 +899,12 @@ unittest
 
 	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
 	assert(idChange.length == 2);
-	//writeln;writeln;
-	//writeln(generateHasMethodCode!IrregularNames);
+
+	/*writeln;writeln;
+
+	struct One
+	{
+		string firstWord;
+	}
+	writeln(generateInsertMethod!One);*/
 }
