@@ -792,6 +792,17 @@ private string generateRemoveMethodCode(T)()
 		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
+			void removeBy%s(const %s valueToFind, size_t amount = 1)
+			{
+				remove!(%s, "%s")(valueToFind, amount);
+			}
+		}, memNameCapitalized, memType, memType, memName);
+
+		code ~= format(q{
+			void removeAllBy%s(const %s valueToFind)
+			{
+				removeAll!(%s, "%s")(valueToFind, 0);
+			}
 		}, memNameCapitalized, memType, memType, memName);
 	}
 
@@ -1004,5 +1015,5 @@ unittest
 	{
 		string firstWord;
 	}
-	writeln(generateInsertMethod!One);*/
+	writeln(generateRemoveMethodCode!One);*/
 }
