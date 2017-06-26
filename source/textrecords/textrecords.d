@@ -177,6 +177,7 @@ struct TextRecords(T)
 		if(fileName.exists)
 		{
 			parse(fileName.readText);
+			return true;
 		}
 
 		return false;
