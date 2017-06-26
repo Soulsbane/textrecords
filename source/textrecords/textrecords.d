@@ -412,6 +412,28 @@ struct TextRecords(T)
 	}
 
 	/**
+			Removes a record(s).
+
+			Params:
+				predicate = The lambda to use in determining what to remove.
+				removeCount = The number of values to remove. Note passing zero will remove everything.
+
+	*/
+	void remove(alias predicate)(size_t removeCount = 1)
+	{
+		auto found = StdFind!(predicate)(recordArray_[]);
+
+		if(removeCount != 0)
+		{
+			recordArray_.linearRemove(found.take(removeCount));
+		}
+		else
+		{
+			recordArray_.linearRemove(found.take(found.length));
+		}
+	}
+
+	/**
 		Just an overload of remove that removes everything.
 
 		Params:
@@ -420,6 +442,17 @@ struct TextRecords(T)
 	void removeAll(S, string recordField)(const S value)
 	{
 		remove!(S, recordField)(value, 0);
+	}
+
+	/**
+			Removes all records that match predicate.
+
+			Params:
+				predicate = The lambda to use in determining what to remove.
+	*/
+	void removeAll(predicate)()
+	{
+		remove!(predicate)(0);
 	}
 
 	/**
@@ -742,6 +775,23 @@ private string generateHasMethodCode(T)()
 				return hasValue!(%s, "%s")(value);
 			}
 		}, memType, memType, memName);
+	}
+
+	return code;
+}
+
+private string generateRemoveMethodCode(T)()
+{
+	string code;
+
+	foreach (i, memberType; typeof(T.tupleof))
+	{
+		immutable string memType = memberType.stringof;
+		immutable string memName = T.tupleof[i].stringof;
+		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
+
+		code ~= format(q{
+		}, memNameCapitalized, memType, memType, memName);
 	}
 
 	return code;
