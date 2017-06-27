@@ -177,6 +177,7 @@ struct TextRecords(T)
 		if(fileName.exists)
 		{
 			parse(fileName.readText);
+			return true;
 		}
 
 		return false;
@@ -500,6 +501,7 @@ struct TextRecords(T)
 	mixin(generateFindMethodCode!T);
 	mixin(generateUpdateMethodCode!T);
 	mixin(generateHasMethodCode!T);
+	mixin(generateRemoveMethodCode!T);
 	// TODO: Add remove method code generation.
 
 	RecordArray recordArray_;
@@ -791,7 +793,32 @@ private string generateRemoveMethodCode(T)()
 		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
+			void removeBy%s(const %s valueToFind, size_t amount = 1)
+			{
+				remove!(%s, "%s")(valueToFind, amount);
+			}
 		}, memNameCapitalized, memType, memType, memName);
+
+		code ~= format(q{
+			void removeAllBy%s(const %s valueToFind)
+			{
+				removeAll!(%s, "%s")(valueToFind);
+			}
+		}, memNameCapitalized, memType, memType, memName);
+
+		code ~= format(q{
+			void remove(string recordField)(const %s valueToFind, size_t amount = 1)
+			{
+				remove!(%s, recordField)(valueToFind, amount);
+			}
+		}, memType, memType);
+
+		code ~= format(q{
+			void removeAll(string recordField)(const %s valueToFind)
+			{
+				removeAll!(%s, recordField)(valueToFind);
+			}
+		},  memType, memType);
 	}
 
 	return code;
@@ -1003,5 +1030,5 @@ unittest
 	{
 		string firstWord;
 	}
-	writeln(generateInsertMethod!One);*/
+	writeln(generateRemoveMethodCode!One);*/
 }
