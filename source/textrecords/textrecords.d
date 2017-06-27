@@ -501,6 +501,7 @@ struct TextRecords(T)
 	mixin(generateFindMethodCode!T);
 	mixin(generateUpdateMethodCode!T);
 	mixin(generateHasMethodCode!T);
+	mixin(generateRemoveMethodCode!T);
 	// TODO: Add remove method code generation.
 
 	RecordArray recordArray_;
@@ -801,9 +802,23 @@ private string generateRemoveMethodCode(T)()
 		code ~= format(q{
 			void removeAllBy%s(const %s valueToFind)
 			{
-				removeAll!(%s, "%s")(valueToFind, 0);
+				removeAll!(%s, "%s")(valueToFind);
 			}
 		}, memNameCapitalized, memType, memType, memName);
+
+		code ~= format(q{
+			void remove(string recordField)(const %s valueToFind, size_t amount = 1)
+			{
+				remove!(%s, recordField)(valueToFind, amount);
+			}
+		}, memType, memType);
+
+		code ~= format(q{
+			void removeAll(string recordField)(const %s valueToFind)
+			{
+				removeAll!(%s, recordField)(valueToFind);
+			}
+		},  memType, memType);
 	}
 
 	return code;
