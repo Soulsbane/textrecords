@@ -771,12 +771,12 @@ private string generateHasMethodCode(T)()
 			}
 		}, memNameCapitalized, memType, memType, memName);
 
-		code ~= format(q{
+		/*code ~= format(q{
 			bool hasValue(string recordField)(const %s value)
 			{
-				return hasValue!(%s, "%s")(value);
+				return hasValue!(%s, recordField)(value);
 			}
-		}, memType, memType, memName);
+		}, memType, memType);*/
 	}
 
 	return code;
@@ -886,6 +886,14 @@ unittest
 	bool notFound = collector.hasValue!(string, "firstName")("Tom");
 	assert(found == true);
 	assert(notFound == false);
+
+	found = collector.hasFirstName("Albert");
+	notFound = collector.hasFirstName("Hana");
+	assert(found == true);
+	assert(notFound == false);
+
+	//found = collector.hasValue!("firstName")("Albert");
+	//notFound = collector.hasValue!("firstName")("Tom");
 
 	writeln("Saving...");
 	collector.save("test.data");
@@ -1024,6 +1032,18 @@ unittest
 	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
 	assert(idChange.length == 2);
 
+	irrCollector.removeById(666);
+	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
+	assert(idChange.length == 1);
+
+	irrCollector.insert("Bobby", "Bob", 354);
+	irrCollector.insert("David", "Dave", 355);
+	irrCollector.insert("Jeanie", "Jean", 356);
+	irrCollector.insert("Jerry", "Jer", 356);
+	assert(irrCollector.length == 6);
+
+	irrCollector.removeAllById(356);
+	assert(irrCollector.length == 4);
 	/*writeln;writeln;
 
 	struct One
