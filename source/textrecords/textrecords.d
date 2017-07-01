@@ -15,6 +15,8 @@ import std.format;
 import std.string;
 import std.path : exists;
 import std.file : readText;
+import std.meta;
+import std.traits;
 
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
 alias StdFind = std.algorithm.searching.find;
@@ -770,13 +772,20 @@ private string generateHasMethodCode(T)()
 				return hasValue!(%s, "%s")(value);
 			}
 		}, memNameCapitalized, memType, memType, memName);
+	}
 
-		/*code ~= format(q{
+	foreach (i, memberType; NoDuplicates!(Fields!T))
+	{
+		immutable string memType = memberType.stringof;
+		immutable string memName = T.tupleof[i].stringof;
+		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
+
+		code ~= format(q{
 			bool hasValue(string recordField)(const %s value)
 			{
 				return hasValue!(%s, recordField)(value);
 			}
-		}, memType, memType);*/
+		}, memType, memType);
 	}
 
 	return code;
@@ -892,8 +901,10 @@ unittest
 	assert(found == true);
 	assert(notFound == false);
 
-	//found = collector.hasValue!("firstName")("Albert");
-	//notFound = collector.hasValue!("firstName")("Tom");
+	found = collector.hasValue!("firstName")("Albert");
+	notFound = collector.hasValue!("firstName")("Tom");
+	assert(found == true);
+	assert(notFound == false);
 
 	writeln("Saving...");
 	collector.save("test.data");
@@ -1044,11 +1055,13 @@ unittest
 
 	irrCollector.removeAllById(356);
 	assert(irrCollector.length == 4);
-	/*writeln;writeln;
+	writeln;writeln;
 
 	struct One
 	{
 		string firstWord;
+		size_t id;
+		string last;
 	}
-	writeln(generateRemoveMethodCode!One);*/
+	writeln(generateHasMethodCode!NameData);
 }
