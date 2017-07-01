@@ -617,6 +617,13 @@ private string generateFindMethodCode(T)()
 				return find!(%s, "%s")(value, 0);
 			}
 		}, memNameCapitalized, memType, memType, memName);
+	}
+
+	foreach (i, memberType; NoDuplicates!(Fields!T))
+	{
+		immutable string memType = memberType.stringof;
+		immutable string memName = T.tupleof[i].stringof;
+		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
 			auto find(string recordField)(const %s value, size_t amount = 1)
@@ -701,6 +708,13 @@ private string generateUpdateMethodCode(T)()
 				updateAll!(%s, "%s")(valueToFind, value);
 			}
 		}, memNameCapitalized, memType, memType, memType, memName);
+	}
+
+	foreach (i, memberType; NoDuplicates!(Fields!T))
+	{
+		immutable string memType = memberType.stringof;
+		immutable string memName = T.tupleof[i].stringof;
+		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
 			void update(string recordField)(const %s valueToFind, const %s value, size_t amount = 1)
@@ -814,6 +828,14 @@ private string generateRemoveMethodCode(T)()
 				removeAll!(%s, "%s")(valueToFind);
 			}
 		}, memNameCapitalized, memType, memType, memName);
+
+	}
+
+	foreach (i, memberType; NoDuplicates!(Fields!T))
+	{
+		immutable string memType = memberType.stringof;
+		immutable string memName = T.tupleof[i].stringof;
+		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
 			void remove(string recordField)(const %s valueToFind, size_t amount = 1)
