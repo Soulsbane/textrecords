@@ -15,6 +15,8 @@ import std.format;
 import std.string;
 import std.path : exists;
 import std.file : readText;
+import std.meta;
+import std.traits;
 
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
 alias StdFind = std.algorithm.searching.find;
@@ -615,6 +617,13 @@ private string generateFindMethodCode(T)()
 				return find!(%s, "%s")(value, 0);
 			}
 		}, memNameCapitalized, memType, memType, memName);
+	}
+
+	foreach (i, memberType; NoDuplicates!(Fields!T))
+	{
+		immutable string memType = memberType.stringof;
+		immutable string memName = T.tupleof[i].stringof;
+		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
 			auto find(string recordField)(const %s value, size_t amount = 1)
@@ -699,6 +708,13 @@ private string generateUpdateMethodCode(T)()
 				updateAll!(%s, "%s")(valueToFind, value);
 			}
 		}, memNameCapitalized, memType, memType, memType, memName);
+	}
+
+	foreach (i, memberType; NoDuplicates!(Fields!T))
+	{
+		immutable string memType = memberType.stringof;
+		immutable string memName = T.tupleof[i].stringof;
+		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
 			void update(string recordField)(const %s valueToFind, const %s value, size_t amount = 1)
@@ -770,13 +786,20 @@ private string generateHasMethodCode(T)()
 				return hasValue!(%s, "%s")(value);
 			}
 		}, memNameCapitalized, memType, memType, memName);
+	}
+
+	foreach (i, memberType; NoDuplicates!(Fields!T))
+	{
+		immutable string memType = memberType.stringof;
+		immutable string memName = T.tupleof[i].stringof;
+		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
 			bool hasValue(string recordField)(const %s value)
 			{
-				return hasValue!(%s, "%s")(value);
+				return hasValue!(%s, recordField)(value);
 			}
-		}, memType, memType, memName);
+		}, memType, memType);
 	}
 
 	return code;
@@ -805,6 +828,14 @@ private string generateRemoveMethodCode(T)()
 				removeAll!(%s, "%s")(valueToFind);
 			}
 		}, memNameCapitalized, memType, memType, memName);
+
+	}
+
+	foreach (i, memberType; NoDuplicates!(Fields!T))
+	{
+		immutable string memType = memberType.stringof;
+		immutable string memName = T.tupleof[i].stringof;
+		immutable string memNameCapitalized = memName[0].toUpper.to!string ~ memName[1..$];
 
 		code ~= format(q{
 			void remove(string recordField)(const %s valueToFind, size_t amount = 1)
@@ -884,6 +915,16 @@ unittest
 
 	bool found = collector.hasValue!(string, "firstName")("Albert");
 	bool notFound = collector.hasValue!(string, "firstName")("Tom");
+	assert(found == true);
+	assert(notFound == false);
+
+	found = collector.hasFirstName("Albert");
+	notFound = collector.hasFirstName("Hana");
+	assert(found == true);
+	assert(notFound == false);
+
+	found = collector.hasValue!("firstName")("Albert");
+	notFound = collector.hasValue!("firstName")("Tom");
 	assert(found == true);
 	assert(notFound == false);
 
@@ -1024,11 +1065,25 @@ unittest
 	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
 	assert(idChange.length == 2);
 
-	/*writeln;writeln;
+	irrCollector.removeById(666);
+	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
+	assert(idChange.length == 1);
+
+	irrCollector.insert("Bobby", "Bob", 354);
+	irrCollector.insert("David", "Dave", 355);
+	irrCollector.insert("Jeanie", "Jean", 356);
+	irrCollector.insert("Jerry", "Jer", 356);
+	assert(irrCollector.length == 6);
+
+	irrCollector.removeAllById(356);
+	assert(irrCollector.length == 4);
+	writeln;writeln;
 
 	struct One
 	{
 		string firstWord;
+		size_t id;
+		string last;
 	}
-	writeln(generateRemoveMethodCode!One);*/
+	writeln(generateHasMethodCode!NameData);
 }
