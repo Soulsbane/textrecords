@@ -6,7 +6,6 @@ module textrecords.textrecords;
 import std.stdio;
 import std.conv : to;
 import std.container : Array;
-import std.string : removechars, lineSplitter;
 import std.regex : Regex, ctRegex, matchFirst;
 import std.algorithm;
 import std.range;
