@@ -1077,7 +1077,7 @@ unittest
 
 	irrCollector.removeAllById(356);
 	assert(irrCollector.length == 4);
-	writeln;writeln;
+	/*writeln;writeln;
 
 	struct One
 	{
@@ -1085,5 +1085,5 @@ unittest
 		size_t id;
 		string last;
 	}
-	writeln(generateHasMethodCode!NameData);
+	writeln(generateHasMethodCode!NameData);*/
 }
