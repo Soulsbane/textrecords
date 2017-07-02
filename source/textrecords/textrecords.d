@@ -503,7 +503,6 @@ struct TextRecords(T)
 	mixin(generateUpdateMethodCode!T);
 	mixin(generateHasMethodCode!T);
 	mixin(generateRemoveMethodCode!T);
-	// TODO: Add remove method code generation.
 
 	RecordArray recordArray_;
 	alias recordArray_ this;
