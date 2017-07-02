@@ -6,7 +6,6 @@ module textrecords.textrecords;
 import std.stdio;
 import std.conv : to;
 import std.container : Array;
-import std.string : removechars, lineSplitter;
 import std.regex : Regex, ctRegex, matchFirst;
 import std.algorithm;
 import std.range;
@@ -1077,7 +1076,7 @@ unittest
 
 	irrCollector.removeAllById(356);
 	assert(irrCollector.length == 4);
-	writeln;writeln;
+	/*writeln;writeln;
 
 	struct One
 	{
@@ -1085,5 +1084,5 @@ unittest
 		size_t id;
 		string last;
 	}
-	writeln(generateHasMethodCode!NameData);
+	writeln(generateHasMethodCode!NameData);*/
 }
