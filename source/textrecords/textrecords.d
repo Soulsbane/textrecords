@@ -803,6 +803,39 @@ private string generateHasMethodCode(T)()
 	return code;
 }
 
+/**
+	Generates various remove methods.
+
+	Given this struct:
+
+	struct One
+	{
+		string firstWord;
+	}
+
+	The following methods will be generated:
+
+	void removeByFirstWord(const string valueToFind, size_t amount = 1)
+	{
+		remove!(string, "firstWord")(valueToFind, amount);
+	}
+
+	void removeAllByFirstWord(const string valueToFind)
+	{
+		removeAll!(string, "firstWord")(valueToFind);
+	}
+
+	void remove(string recordField)(const string valueToFind, size_t amount = 1)
+	{
+		remove!(string, recordField)(valueToFind, amount);
+	}
+
+	void removeAll(string recordField)(const string valueToFind)
+	{
+		removeAll!(string, recordField)(valueToFind);
+	}
+
+*/
 private string generateRemoveMethodCode(T)()
 {
 	string code;
