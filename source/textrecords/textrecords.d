@@ -890,6 +890,7 @@ private string generateRemoveMethodCode(T)()
 unittest
 {
 	import std.stdio : writeln;
+	import fluent.asserts;
 
 	immutable string data =
 	q{
@@ -922,48 +923,40 @@ unittest
 
 	auto records = collector.getRecordsRaw();
 
-	assert(records.front.firstName == "Albert");
-	assert(records.back.firstName == "Albert");
-	assert(records.length == 3);
-	assert(records[0].firstName == "Albert");
+	records.front.firstName.should.equal("Albert");
+	records.back.firstName.should.equal("Albert");
+	records.length.should.equal(3);
+	records[0].firstName.should.equal("Albert");
 
 	// Since TextRecords supports alias this we can also use collector directly without calling getRecordsRaw.
-	assert(collector.front.firstName == "Albert");
-	assert(collector.back.firstName == "Albert");
-	assert(collector.length == 3);
-	assert(collector[0].firstName == "Albert");
+	collector.front.firstName.should.equal("Albert");
+	collector.back.firstName.should.equal("Albert");
+	collector.length.should.equal(3);
+	collector[0].firstName.should.equal("Albert");
 
 	collector.dump();
 	writeln;
 
-	writeln("Testing findAll...found these records:");
 	auto foundRecords = collector.findAll!(string, "firstName")("Albert");
-
-	foreach(foundRecord; foundRecords)
-	{
-		writeln(foundRecord);
-	}
+	foundRecords.length.should.equal(2);
 
 	bool found = collector.hasValue!(string, "firstName")("Albert");
 	bool notFound = collector.hasValue!(string, "firstName")("Tom");
-	assert(found == true);
-	assert(notFound == false);
+	found.should.equal(true);
+	notFound.should.equal(false);
 
 	found = collector.hasFirstName("Albert");
 	notFound = collector.hasFirstName("Hana");
-	assert(found == true);
-	assert(notFound == false);
+	found.should.equal(true);
+	notFound.should.equal(false);
 
 	found = collector.hasValue!("firstName")("Albert");
 	notFound = collector.hasValue!("firstName")("Tom");
-	assert(found == true);
-	assert(notFound == false);
+	found.should.equal(true);
+	notFound.should.equal(false);
 
 	writeln("Saving...");
 	collector.save("test.data");
-
-	writeln;
-	writeln("Processing records for VariedData:");
 
 	immutable string variedData =
 	q{
@@ -988,8 +981,6 @@ unittest
 		}
 	};
 
-	enum fileName = "test-record.dat";
-
 	struct VariedData
 	{
 		string name;
@@ -999,47 +990,50 @@ unittest
 	TextRecords!VariedData variedCollector;
 
 	variedCollector.parse(variedData);
-	assert(variedCollector.length == 4);
+	variedCollector.length.should.equal(4);
 	//variedCollector.parseFile(variedData); // FIXME: Add temporary file.
 
 	auto variedFoundRecords = variedCollector.findAll!(size_t, "id")(100);
-	assert(variedFoundRecords.length == 3);
+	variedFoundRecords.length.should.equal(3);
 
 	auto variedRecords = variedCollector.getRecordsRaw();
 	variedCollector.dump();
 
 	bool canFindValue = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 100);
-	assert(canFindValue == true);
-	canFindValue = variedCollector.hasValue!((VariedData data) => data.id == 100); // Somewhat easier to use than canFind.
-	assert(canFindValue == true);
-	canFindValue = variedCollector.hasId(100);
-	assert(canFindValue == true);
-	canFindValue = variedCollector.hasValue!("id")(100);
-	assert(canFindValue == true);
+	canFindValue.should.equal(true);
 
-	assert(variedCollector.findAllById(100).length == 3);
+	canFindValue = variedCollector.hasValue!((VariedData data) => data.id == 100); // Somewhat easier to use than canFind.
+	canFindValue.should.equal(true);
+
+	canFindValue = variedCollector.hasId(100);
+	canFindValue.should.equal(true);
+
+	canFindValue = variedCollector.hasValue!("id")(100);
+	canFindValue.should.equal(true);
+
+	variedCollector.findAllById(100).length.should.equal(3);
 
 	variedCollector.remove!(size_t, "id")(100);
-	assert(variedCollector.length == 3);
+	variedCollector.length.should.equal(3);
 
 	variedCollector.removeAll!(size_t, "id")(100);
-	assert(variedCollector.length == 1);
+	variedCollector.length.should.equal(1);
 
 	immutable bool canFindValueInvalid = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 999);
-	assert(canFindValueInvalid == false);
+	canFindValueInvalid.should.equal(false);
 
 	VariedData insertData;
 	variedCollector.insert(insertData);
-	assert(variedCollector.length == 2);
+	variedCollector.length.should.equal(2);
 
 	variedCollector.insert("Utada Hikaru", 111);
-	assert(variedCollector.length == 3);
+	variedCollector.length.should.equal(3);
 
 	auto record = variedCollector.find!(size_t, "id")(111);
-	assert(record[0].name == "Utada Hikaru");
+	record[0].name.should.equal("Utada Hikaru");
 
 	auto usingNamedMethod = variedCollector.findById(111);
-	assert(usingNamedMethod[0].name == "Utada Hikaru");
+	usingNamedMethod[0].name.should.equal("Utada Hikaru");
 
 	variedCollector.save("varied.db");
 
@@ -1074,40 +1068,40 @@ unittest
 	irrCollector.parse(irrData);
 
 	auto idRecords = irrCollector.findAllById(100);
-	assert(idRecords[1].realName == "Utada Hikaru");
+	idRecords[1].realName.should.equal("Utada Hikaru");
 
 	auto nickNameRecords = irrCollector.findAllByNickName("hikki");
-	assert(nickNameRecords[0].realName == "Utada Hikaru");
+	nickNameRecords[0].realName.should.equal("Utada Hikaru");
 
 	irrCollector.update!(size_t, "id", (IrregularNames data) => data.id == 122 && data.nickName == "Liz")(333, 0);
 	auto idChange = irrCollector.findById(333);
-	assert(idChange.length == 1);
+	idChange.length.should.equal(1);
 
 	irrCollector.updateAllById(100, 666);
 	idChange = irrCollector.findAllById(666);
-	assert(idChange.length == 2);
+	idChange.length.should.equal(2);
 
 	idChange = irrCollector.findAll!("id")(666);
-	assert(idChange.length == 2);
+	idChange.length.should.equal(2);
 
 	idChange = irrCollector.find!((IrregularNames data) => data.id == 666)(0);
-	assert(idChange.length == 2);
+	idChange.length.should.equal(2);
 
 	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
-	assert(idChange.length == 2);
+	idChange.length.should.equal(2);
 
 	irrCollector.removeById(666);
 	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
-	assert(idChange.length == 1);
+	idChange.length.should.equal(1);
 
 	irrCollector.insert("Bobby", "Bob", 354);
 	irrCollector.insert("David", "Dave", 355);
 	irrCollector.insert("Jeanie", "Jean", 356);
 	irrCollector.insert("Jerry", "Jer", 356);
-	assert(irrCollector.length == 6);
+	irrCollector.length.should.equal(6);
 
 	irrCollector.removeAllById(356);
-	assert(irrCollector.length == 4);
+	irrCollector.length.should.equal(4);
 	/*writeln;writeln;
 
 	struct One
