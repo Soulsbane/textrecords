@@ -1011,29 +1011,29 @@ unittest
 	canFindValue = variedCollector.hasValue!("id")(100);
 	canFindValue.should.equal(true);
 
-	assert(variedCollector.findAllById(100).length == 3);
+	variedCollector.findAllById(100).length.should.equal(3);
 
 	variedCollector.remove!(size_t, "id")(100);
-	assert(variedCollector.length == 3);
+	variedCollector.length.should.equal(3);
 
 	variedCollector.removeAll!(size_t, "id")(100);
-	assert(variedCollector.length == 1);
+	variedCollector.length.should.equal(1);
 
 	immutable bool canFindValueInvalid = canFind!((VariedData data, size_t id) => data.id == id)(variedCollector[], 999);
-	assert(canFindValueInvalid == false);
+	canFindValueInvalid.should.equal(false);
 
 	VariedData insertData;
 	variedCollector.insert(insertData);
-	assert(variedCollector.length == 2);
+	variedCollector.length.should.equal(2);
 
 	variedCollector.insert("Utada Hikaru", 111);
-	assert(variedCollector.length == 3);
+	variedCollector.length.should.equal(3);
 
 	auto record = variedCollector.find!(size_t, "id")(111);
-	assert(record[0].name == "Utada Hikaru");
+	record[0].name.should.equal("Utada Hikaru");
 
 	auto usingNamedMethod = variedCollector.findById(111);
-	assert(usingNamedMethod[0].name == "Utada Hikaru");
+	usingNamedMethod[0].name.should.equal("Utada Hikaru");
 
 	variedCollector.save("varied.db");
 
@@ -1068,40 +1068,40 @@ unittest
 	irrCollector.parse(irrData);
 
 	auto idRecords = irrCollector.findAllById(100);
-	assert(idRecords[1].realName == "Utada Hikaru");
+	idRecords[1].realName.should.equal("Utada Hikaru");
 
 	auto nickNameRecords = irrCollector.findAllByNickName("hikki");
-	assert(nickNameRecords[0].realName == "Utada Hikaru");
+	nickNameRecords[0].realName.should.equal("Utada Hikaru");
 
 	irrCollector.update!(size_t, "id", (IrregularNames data) => data.id == 122 && data.nickName == "Liz")(333, 0);
 	auto idChange = irrCollector.findById(333);
-	assert(idChange.length == 1);
+	idChange.length.should.equal(1);
 
 	irrCollector.updateAllById(100, 666);
 	idChange = irrCollector.findAllById(666);
-	assert(idChange.length == 2);
+	idChange.length.should.equal(2);
 
 	idChange = irrCollector.findAll!("id")(666);
-	assert(idChange.length == 2);
+	idChange.length.should.equal(2);
 
 	idChange = irrCollector.find!((IrregularNames data) => data.id == 666)(0);
-	assert(idChange.length == 2);
+	idChange.length.should.equal(2);
 
 	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
-	assert(idChange.length == 2);
+	idChange.length.should.equal(2);
 
 	irrCollector.removeById(666);
 	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
-	assert(idChange.length == 1);
+	idChange.length.should.equal(1);
 
 	irrCollector.insert("Bobby", "Bob", 354);
 	irrCollector.insert("David", "Dave", 355);
 	irrCollector.insert("Jeanie", "Jean", 356);
 	irrCollector.insert("Jerry", "Jer", 356);
-	assert(irrCollector.length == 6);
+	irrCollector.length.should.equal(6);
 
 	irrCollector.removeAllById(356);
-	assert(irrCollector.length == 4);
+	irrCollector.length.should.equal(4);
 	/*writeln;writeln;
 
 	struct One
