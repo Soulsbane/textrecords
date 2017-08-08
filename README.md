@@ -5,44 +5,44 @@ A simple text based record database.
 
 ### Example 1
 ```d
-     immutable string data =
-    q{
-        {
-            firstName "Albert"
-            lastName "Einstein"
-        }
+	 immutable string data =
+	q{
+		{
+			firstName "Albert"
+			lastName "Einstein"
+		}
 
-        {
-            firstName "John"
-            lastName "Doe"
-        }
+		{
+			firstName "John"
+			lastName "Doe"
+		}
 
-        {
-            firstName "Albert"
-            lastName "Einstein"
-        }
-    };
+		{
+			firstName "Albert"
+			lastName "Einstein"
+		}
+	};
 
-    struct NameData
-    {
-        string firstName;
-        string lastName;
-    }
+	struct NameData
+	{
+		string firstName;
+		string lastName;
+	}
 
 	TextRecords!NameData collector;
 	collector.parse(data);
 	auto records = collector.getRecordsRaw();
 
-   	assert(records.front.firstName == "Albert");
-    assert(records.back.firstName == "Albert");
-    assert(records.length == 3);
-    assert(records[0].firstName == "Albert");
+	assert(records.front.firstName == "Albert");
+	assert(records.back.firstName == "Albert");
+	assert(records.length == 3);
+	assert(records[0].firstName == "Albert");
 
-    assert(collector.front.firstName == "Albert");
-    assert(collector.back.firstName == "Albert");
-   	assert(collector.length == 3);
-    assert(collector[0].firstName == "Albert");
-    auto foundRecords = collector.findAll!(string, "firstName")("Albert");
+	assert(collector.front.firstName == "Albert");
+	assert(collector.back.firstName == "Albert");
+	assert(collector.length == 3);
+	assert(collector[0].firstName == "Albert");
+	auto foundRecords = collector.findAll!(string, "firstName")("Albert");
 
 	foreach(foundRecord; foundRecords)
 	{
