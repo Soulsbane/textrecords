@@ -17,6 +17,8 @@ import std.file : readText;
 import std.meta;
 import std.traits;
 
+import dstringutils.utils;
+
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
 alias StdFind = std.algorithm.searching.find;
 
@@ -85,8 +87,8 @@ struct TextRecords(T)
 
 			if(!re.empty)
 			{
-				immutable string key = re["key"].removechars("\"");
-				immutable string value = re["value"].removechars("\"");
+				immutable string key = re["key"].removeChars("\"");
+				immutable string value = re["value"].removeChars("\"");
 
 				foreach(field; allMembers!T)
 				{
@@ -534,7 +536,7 @@ private string generateInsertMethod(T)()
 
 	code = "void insert(";
 
-	foreach (index, memberType; typeof(T.tupleof))
+	foreach(index, memberType; typeof(T.tupleof))
 	{
 		code ~= memberType.stringof ~ " " ~ T.tupleof[index].stringof ~ ",";
 	}
@@ -548,7 +550,7 @@ private string generateInsertMethod(T)()
 	code ~= "\tT data;\n\n";
 
 
-	foreach (index, memberType; typeof(T.tupleof))
+	foreach(index, memberType; typeof(T.tupleof))
 	{
 		string memberName = T.tupleof[index].stringof;
 		code ~= "\tdata." ~  memberName ~ " = " ~ memberName ~ ";\n";
@@ -596,7 +598,7 @@ private string generateFindMethodCode(T)()
 {
 	string code;
 
-	foreach (i, memberType; typeof(T.tupleof))
+	foreach(i, memberType; typeof(T.tupleof))
 	{
 		immutable string memType = memberType.stringof;
 		immutable string memName = T.tupleof[i].stringof;
@@ -617,7 +619,7 @@ private string generateFindMethodCode(T)()
 		}, memNameCapitalized, memType, memType, memName);
 	}
 
-	foreach (i, memberType; NoDuplicates!(Fields!T))
+	foreach(i, memberType; NoDuplicates!(Fields!T))
 	{
 		immutable string memType = memberType.stringof;
 		immutable string memName = T.tupleof[i].stringof;
@@ -687,7 +689,7 @@ private string generateUpdateMethodCode(T)()
 {
 	string code;
 
-	foreach (i, memberType; typeof(T.tupleof))
+	foreach(i, memberType; typeof(T.tupleof))
 	{
 		immutable string memType = memberType.stringof;
 		immutable string memName = T.tupleof[i].stringof;
@@ -708,7 +710,7 @@ private string generateUpdateMethodCode(T)()
 		}, memNameCapitalized, memType, memType, memType, memName);
 	}
 
-	foreach (i, memberType; NoDuplicates!(Fields!T))
+	foreach(i, memberType; NoDuplicates!(Fields!T))
 	{
 		immutable string memType = memberType.stringof;
 		immutable string memName = T.tupleof[i].stringof;
@@ -772,7 +774,7 @@ private string generateHasMethodCode(T)()
 {
 	string code;
 
-	foreach (i, memberType; typeof(T.tupleof))
+	foreach(i, memberType; typeof(T.tupleof))
 	{
 		immutable string memType = memberType.stringof;
 		immutable string memName = T.tupleof[i].stringof;
@@ -786,7 +788,7 @@ private string generateHasMethodCode(T)()
 		}, memNameCapitalized, memType, memType, memName);
 	}
 
-	foreach (i, memberType; NoDuplicates!(Fields!T))
+	foreach(i, memberType; NoDuplicates!(Fields!T))
 	{
 		immutable string memType = memberType.stringof;
 		immutable string memName = T.tupleof[i].stringof;
@@ -840,7 +842,7 @@ private string generateRemoveMethodCode(T)()
 {
 	string code;
 
-	foreach (i, memberType; typeof(T.tupleof))
+	foreach(i, memberType; typeof(T.tupleof))
 	{
 		immutable string memType = memberType.stringof;
 		immutable string memName = T.tupleof[i].stringof;
@@ -862,7 +864,7 @@ private string generateRemoveMethodCode(T)()
 
 	}
 
-	foreach (i, memberType; NoDuplicates!(Fields!T))
+	foreach(i, memberType; NoDuplicates!(Fields!T))
 	{
 		immutable string memType = memberType.stringof;
 		immutable string memName = T.tupleof[i].stringof;
