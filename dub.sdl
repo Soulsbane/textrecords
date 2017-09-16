@@ -8,3 +8,4 @@ configuration "library" {
 }
 
 dependency "fluent-asserts" version="~>0.6.0"
+dependency "dstringutils" version="*"

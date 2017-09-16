@@ -17,6 +17,8 @@ import std.file : readText;
 import std.meta;
 import std.traits;
 
+import dstringutils.utils;
+
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
 alias StdFind = std.algorithm.searching.find;
 
@@ -85,8 +87,8 @@ struct TextRecords(T)
 
 			if(!re.empty)
 			{
-				immutable string key = re["key"].removechars("\"");
-				immutable string value = re["value"].removechars("\"");
+				immutable string key = re["key"].removeChars("\"");
+				immutable string value = re["value"].removeChars("\"");
 
 				foreach(field; allMembers!T)
 				{
