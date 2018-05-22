@@ -478,8 +478,7 @@ struct TextRecords(T)
 		Determines if a value is found in a recordField.
 
 		Params:
-			recordField = The field used for finding the value.
-			value = The value to find.
+				predicate = The lambda to use in determining if the value can be found.
 
 		Returns:
 			true if found false otherwise.
