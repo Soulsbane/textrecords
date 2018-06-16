@@ -3,19 +3,10 @@
 */
 module textrecords.textrecords;
 
-import std.stdio;
-import std.conv : to;
-import std.container : Array;
-import std.regex : Regex, ctRegex, matchFirst;
-import std.algorithm;
-import std.range;
-import std.array;
-import std.format;
-import std.string;
-import std.path : exists;
-import std.file : readText;
-import std.meta;
-import std.traits;
+import std.stdio, std.conv, std.container;
+import std.regex, std.algorithm, std.range;
+import std.array, std.format, std.string;
+import std.path, std.file, std.meta, std.traits;
 
 import dstringutils.utils;
 
@@ -197,9 +188,6 @@ struct TextRecords(T)
 	*/
 	RecordArray parseFileRaw(const string fileName)
 	{
-		import std.path : exists;
-		import std.file : readText;
-
 		RecordArray recArray;
 
 		if(fileName.exists)
