@@ -18,7 +18,7 @@ shared static this()
 	/*
 		FIXME: If a record contains a string member the program will exit with SIGILL(illegal instruction)
 		when inserting the record into the Array!T type. This is a bug in DMD/Phobos. We have to force GC init
-		here.
+		here. Issue 18996 on issues.dlang.org.
 	*/
 	auto a = "init gc".dup; // force GC init...
 }
