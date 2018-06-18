@@ -13,6 +13,16 @@ import dstringutils.utils;
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
 alias StdFind = std.algorithm.searching.find;
 
+shared static this()
+{
+	/*
+		FIXME: If a record contains a string member the program will exit with SIGILL(illegal instruction)
+		when inserting the record into the Array!T type. This is a bug in DMD/Phobos. We have to force GC init
+		here.
+	*/
+	auto a = "init gc".dup; // force GC init...
+}
+
 private template allMembers(T)
 {
 	enum allMembers = __traits(allMembers, T);
