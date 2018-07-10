@@ -7,5 +7,6 @@ configuration "library" {
 	targetType "library"
 }
 
-dependency "fluent-asserts" version="~>0.6.0"
+//dependency "fluent-asserts" version="~>0.6.0"
+dependency "dshould" version="~>0.1.13"
 dependency "dstringutils" version="*"

@@ -889,7 +889,7 @@ private string generateRemoveMethodCode(T)()
 unittest
 {
 	import std.stdio : writeln;
-	import fluent.asserts;
+	import dshould;
 
 	immutable string data =
 	q{
