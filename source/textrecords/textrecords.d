@@ -7,20 +7,24 @@ import std.stdio, std.conv, std.container;
 import std.regex, std.algorithm, std.range;
 import std.array, std.format, std.string;
 import std.path, std.file, std.meta, std.traits;
+import std.compiler;
 
 import dstringutils.utils;
 
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
 alias StdFind = std.algorithm.searching.find;
 
-shared static this()
+static if(version_major <= 2 && version_minor < 81)
 {
-	/*
-		FIXME: If a record contains a string member the program will exit with SIGILL(illegal instruction)
-		when inserting the record into the Array!T type. This is a bug in DMD/Phobos. We have to force GC init
-		here. Issue 18996 on issues.dlang.org.
-	*/
-	auto a = "init gc".dup; // force GC init...
+	shared static this()
+	{
+		/*
+			FIXME: If a record contains a string member the program will exit with SIGILL(illegal instruction)
+			when inserting the record into the Array!T type. This is a bug in DMD/Phobos. We have to force GC init
+			here. Issue 18996 on issues.dlang.org.
+		*/
+		auto a = "init gc".dup; // force GC init...
+	}
 }
 
 private template allMembers(T)
