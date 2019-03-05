@@ -608,7 +608,7 @@ private string generateFindMethodCode(T)()
 		code ~= format(q{
 			auto findBy%s(const %s value)
 			{
-				return find!(%s, "%s")(value);
+				return find!(%s, "%s")(value)[0];
 			}
 		}, memNameCapitalized, memType, memType, memName);
 
