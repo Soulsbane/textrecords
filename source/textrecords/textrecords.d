@@ -118,16 +118,17 @@ struct TextRecords(T)
 	*/
 	void parse(const string records)
 	{
+		// FIXME: Better error handling.
 		auto lines = records.lineSplitter();
 		StringArray strArray;
 
 		foreach(line; lines)
 		{
-			if(line.canFind("{"))
+			if(line.strip.canFind("{"))
 			{
 				strArray.clear();
 			}
-			else if(line.canFind("}"))
+			else if(line.strip.canFind("}"))
 			{
 				recordArray_.insert(convertToRecord(strArray));
 			}
