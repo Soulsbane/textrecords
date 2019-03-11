@@ -1037,7 +1037,7 @@ unittest
 	record[0].name.should.equal("Utada Hikaru");
 
 	auto usingNamedMethod = variedCollector.findById(111);
-	usingNamedMethod[0].name.should.equal("Utada Hikaru");
+	usingNamedMethod.name.should.equal("Utada Hikaru");
 
 	variedCollector.save("varied.db");
 
@@ -1078,25 +1078,23 @@ unittest
 	nickNameRecords[0].realName.should.equal("Utada Hikaru");
 
 	irrCollector.update!(size_t, "id", (IrregularNames data) => data.id == 122 && data.nickName == "Liz")(333, 0);
-	auto idChange = irrCollector.findById(333);
-	idChange.length.should.equal(1);
 
 	irrCollector.updateAllById(100, 666);
-	idChange = irrCollector.findAllById(666);
-	idChange.length.should.equal(2);
+	auto idSix = irrCollector.findAllById(666);
+	idSix.length.should.equal(2);
 
-	idChange = irrCollector.findAll!("id")(666);
-	idChange.length.should.equal(2);
+	auto idSixFindAll = irrCollector.findAll!("id")(666);
+	idSixFindAll.length.should.equal(2);
 
-	idChange = irrCollector.find!((IrregularNames data) => data.id == 666)(0);
-	idChange.length.should.equal(2);
+	auto idSixFind = irrCollector.find!((IrregularNames data) => data.id == 666)(0);
+	idSixFind.length.should.equal(2);
 
-	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
-	idChange.length.should.equal(2);
+	auto idSixPredicate = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
+	idSixPredicate.length.should.equal(2);
 
 	irrCollector.removeById(666);
-	idChange = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
-	idChange.length.should.equal(1);
+	auto idSixPredicate2 = irrCollector.findAll!((IrregularNames data) => data.id == 666)();
+	idSixPredicate2.length.should.equal(1);
 
 	irrCollector.insert("Bobby", "Bob", 354);
 	irrCollector.insert("David", "Dave", 355);
