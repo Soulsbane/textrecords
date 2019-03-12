@@ -119,16 +119,13 @@ struct TextRecords(T)
 	*/
 	void parse(const string records)
 	{
-		auto lines = records.lineSplitter();
+		immutable auto lines = records.lineSplitter().array;
 		StringArray strArray;
 		size_t bracketCounter;
-		size_t lineCounter;
 		string fileName_ = __FILE__;
 
-		foreach(line; lines)
+		foreach(lineCounter, line; lines)
 		{
-			++lineCounter;
-
 			if(line.strip.canFind("{"))
 			{
 				++bracketCounter;
