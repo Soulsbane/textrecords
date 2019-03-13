@@ -10,6 +10,7 @@ import std.path, std.file, std.meta, std.traits;
 import std.compiler;
 
 import dstringutils.utils;
+import textrecords.parseexception;
 
 private auto RECORD_FIELD_REGEX = ctRegex!(`\s+(?P<key>\w+)\s{1,1}(?P<value>.*)`);
 alias StdFind = std.algorithm.searching.find;
@@ -118,19 +119,37 @@ struct TextRecords(T)
 	*/
 	void parse(const string records)
 	{
-		// FIXME: Better error handling.
-		auto lines = records.lineSplitter();
+		immutable auto lines = records.lineSplitter().array;
 		StringArray strArray;
+		size_t bracketCounter;
 
-		foreach(line; lines)
+		foreach(lineCounter, line; lines)
 		{
-			if(line.strip.canFind("{"))
+			if(line.strip.startsWith("{"))
 			{
-				strArray.clear();
+				++bracketCounter;
+
+				if(bracketCounter > 1)
+				{
+					throw new TextRecordsParseException("Braket mismatch", fileName_, lineCounter);
+				}
+				else
+				{
+					strArray.clear();
+				}
 			}
-			else if(line.strip.canFind("}"))
+			else if(line.strip.startsWith("}"))
 			{
-				recordArray_.insert(convertToRecord(strArray));
+				--bracketCounter;
+
+				if(bracketCounter == 0)
+				{
+					recordArray_.insert(convertToRecord(strArray));
+				}
+				else
+				{
+					throw new TextRecordsParseException("Braket mismatch", fileName_, lineCounter);
+				}
 			}
 			else
 			{
@@ -150,18 +169,37 @@ struct TextRecords(T)
 	*/
 	RecordArray parseRaw(const string records)
 	{
-		auto lines = records.lineSplitter();
+		immutable auto lines = records.lineSplitter().array;
 		StringArray strArray;
+		size_t bracketCounter;
 
-		foreach(line; lines)
+		foreach(lineCounter, line; lines)
 		{
-			if(line.canFind("{"))
+			if(line.strip.startsWith("{"))
 			{
-				strArray.clear();
+				++bracketCounter;
+
+				if(bracketCounter > 1)
+				{
+					throw new TextRecordsParseException("Braket mismatch", fileName_, lineCounter);
+				}
+				else
+				{
+					strArray.clear();
+				}
 			}
-			else if(line.canFind("}"))
+			else if(line.strip.startsWith("}"))
 			{
-				recordArray_.insert(convertToRecord(strArray));
+				--bracketCounter;
+
+				if(bracketCounter == 0)
+				{
+					recordArray_.insert(convertToRecord(strArray));
+				}
+				else
+				{
+					throw new TextRecordsParseException("Braket mismatch", fileName_, lineCounter);
+				}
 			}
 			else
 			{
@@ -185,7 +223,9 @@ struct TextRecords(T)
 	{
 		if(fileName.exists)
 		{
+			fileName_ = fileName;
 			parse(fileName.readText);
+
 			return true;
 		}
 
@@ -207,6 +247,7 @@ struct TextRecords(T)
 
 		if(fileName.exists)
 		{
+			fileName_ = fileName;
 			recArray = parseRaw(fileName.readText);
 		}
 
@@ -510,6 +551,8 @@ struct TextRecords(T)
 
 	RecordArray recordArray_;
 	alias recordArray_ this;
+
+	string fileName_ = "records.tr";
 }
 
 /**
@@ -897,7 +940,7 @@ unittest
 	import dshould;
 
 	immutable string data =
-	q{
+	`
 		{
 			firstName "Albert"
 			lastName "Einstein"
@@ -912,7 +955,7 @@ unittest
 			firstName "Albert"
 			lastName "Einstein"
 		}
-	};
+	`;
 
 	struct NameData
 	{
@@ -963,7 +1006,7 @@ unittest
 	collector.save("test.data");
 
 	immutable string variedData =
-	q{
+	`
 		{
 			name "Albert Einstein"
 			id "100"
@@ -983,7 +1026,7 @@ unittest
 			name "Nakamoto Suzuka"
 			id "100"
 		}
-	};
+	`;
 
 	struct VariedData
 	{
@@ -1042,7 +1085,7 @@ unittest
 	variedCollector.save("varied.db");
 
 	immutable string irrData =
-	q{
+	`
 		{
 			nickName "Lisa"
 			realName "Melissa"
@@ -1054,12 +1097,13 @@ unittest
 			realName "Elizabeth Rogers"
 			id "122"
 		}
+
 		{
 			nickName "hikki"
 			realName "Utada Hikaru"
 			id "100"
 		}
-	};
+	`;
 
 	struct IrregularNames
 	{
