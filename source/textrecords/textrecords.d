@@ -169,18 +169,37 @@ struct TextRecords(T)
 	*/
 	RecordArray parseRaw(const string records)
 	{
-		auto lines = records.lineSplitter();
+		immutable auto lines = records.lineSplitter().array;
 		StringArray strArray;
+		size_t bracketCounter;
 
-		foreach(line; lines)
+		foreach(lineCounter, line; lines)
 		{
-			if(line.canFind("{"))
+			if(line.strip.startsWith("{"))
 			{
-				strArray.clear();
+				++bracketCounter;
+
+				if(bracketCounter > 1)
+				{
+					throw new TextRecordsParseException("Braket mismatch", fileName_, lineCounter);
+				}
+				else
+				{
+					strArray.clear();
+				}
 			}
-			else if(line.canFind("}"))
+			else if(line.strip.startsWith("}"))
 			{
-				recordArray_.insert(convertToRecord(strArray));
+				--bracketCounter;
+
+				if(bracketCounter == 0)
+				{
+					recordArray_.insert(convertToRecord(strArray));
+				}
+				else
+				{
+					throw new TextRecordsParseException("Braket mismatch", fileName_, lineCounter);
+				}
 			}
 			else
 			{
@@ -228,6 +247,7 @@ struct TextRecords(T)
 
 		if(fileName.exists)
 		{
+			fileName_ = fileName;
 			recArray = parseRaw(fileName.readText);
 		}
 
