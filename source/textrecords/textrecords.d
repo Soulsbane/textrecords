@@ -122,11 +122,10 @@ struct TextRecords(T)
 		immutable auto lines = records.lineSplitter().array;
 		StringArray strArray;
 		size_t bracketCounter;
-		string fileName_ = __FILE__;
 
 		foreach(lineCounter, line; lines)
 		{
-			if(line.strip.canFind("{"))
+			if(line.strip.startsWith("{"))
 			{
 				++bracketCounter;
 
@@ -139,7 +138,7 @@ struct TextRecords(T)
 					strArray.clear();
 				}
 			}
-			else if(line.strip.canFind("}"))
+			else if(line.strip.startsWith("}"))
 			{
 				--bracketCounter;
 
