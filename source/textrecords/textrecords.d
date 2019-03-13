@@ -205,7 +205,9 @@ struct TextRecords(T)
 	{
 		if(fileName.exists)
 		{
+			fileName_ = fileName;
 			parse(fileName.readText);
+
 			return true;
 		}
 
@@ -530,6 +532,8 @@ struct TextRecords(T)
 
 	RecordArray recordArray_;
 	alias recordArray_ this;
+
+	string fileName_ = "records.tr";
 }
 
 /**
