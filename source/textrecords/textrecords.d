@@ -304,8 +304,6 @@ struct TextRecords(T)
 		return recordArray_;
 	}
 
-	alias getRecords = getRecordsRaw; // FIXME: Remove once deprecated phase is over.
-
 	/**
 		Returns a reference to the array of records.
 
