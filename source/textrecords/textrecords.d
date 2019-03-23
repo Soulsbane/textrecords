@@ -304,8 +304,6 @@ struct TextRecords(T)
 		return recordArray_;
 	}
 
-	alias getRecords = getRecordsRaw; // FIXME: Remove once deprecated phase is over.
-
 	/**
 		Returns a reference to the array of records.
 
@@ -619,25 +617,35 @@ private string generateInsertMethod(T)()
 
 	The following methods will be generated:
 
-	auto findByFirstWord(const string value)
-	{
-		return find!(string, "firstWord")(value);
-	}
+		auto findByFirstWord(const string value)
+		{
+			return find!(string, "firstWord")(value)[0];
+		}
 
-	auto findAllByFirstWord(const string value)
-	{
-		return find!(string, "firstWord")(value, 0);
-	}
+		auto findAllByFirstWord(const string value)
+		{
+			return find!(string, "firstWord")(value, 0);
+		}
 
-	auto find(string recordField)(const string value, size_t amount = 1)
-	{
-		return find!(string, recordField)(value, amount);
-	}
+		auto findFirstWordWithValue(const string value)
+		{
+			return find!(string, "firstWord")(value)[0];
+		}
 
-	auto findAll(string recordField)(const string value, size_t amount = 1)
-	{
-		return findAll!(string, recordField)(value);
-	}
+		auto findAllFirstWordsWithValue(const string value)
+		{
+			return find!(string, "firstWord")(value, 0);
+		}
+
+		auto find(string recordField)(const string value, size_t amount = 1)
+		{
+			return find!(string, recordField)(value, amount);
+		}
+
+		auto findAll(string recordField)(const string value, size_t amount = 1)
+		{
+			return findAll!(string, recordField)(value);
+		}
 */
 private string generateFindMethodCode(T)()
 {
@@ -658,6 +666,21 @@ private string generateFindMethodCode(T)()
 
 		code ~= format(q{
 			auto findAllBy%s(const %s value)
+			{
+				return find!(%s, "%s")(value, 0);
+			}
+		}, memNameCapitalized, memType, memType, memName);
+
+		// With methods
+		code ~= format(q{
+			auto find%sWithValue(const %s value)
+			{
+				return find!(%s, "%s")(value)[0];
+			}
+		}, memNameCapitalized, memType, memType, memName);
+
+		code ~= format(q{
+			auto findAll%ssWithValue(const %s value)
 			{
 				return find!(%s, "%s")(value, 0);
 			}
@@ -1082,6 +1105,9 @@ unittest
 	auto usingNamedMethod = variedCollector.findById(111);
 	usingNamedMethod.name.should.equal("Utada Hikaru");
 
+	auto usingNamedMethodWith = variedCollector.findIdWithValue(111);
+	usingNamedMethodWith.name.should.equal("Utada Hikaru");
+
 	variedCollector.save("varied.db");
 
 	immutable string irrData =
@@ -1121,6 +1147,9 @@ unittest
 	auto nickNameRecords = irrCollector.findAllByNickName("hikki");
 	nickNameRecords[0].realName.should.equal("Utada Hikaru");
 
+	auto nickNameWithValue= irrCollector.findAllNickNamesWithValue("hikki");
+	nickNameWithValue[0].realName.should.equal("Utada Hikaru");
+
 	irrCollector.update!(size_t, "id", (IrregularNames data) => data.id == 122 && data.nickName == "Liz")(333, 0);
 
 	irrCollector.updateAllById(100, 666);
@@ -1156,5 +1185,6 @@ unittest
 		size_t id;
 		string last;
 	}
-	writeln(generateHasMethodCode!NameData);*/
+	writeln(generateHasMethodCode!NameData);
+	writeln(generateFindMethodCode!One);*/
 }
